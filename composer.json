@@ -1,0 +1,35 @@
+{
+    "name": "it-shura/mediawiki-sdk",
+    "description": "SDK for MediaWiki API",
+    "type": "library",
+    "keywords": ["mediawiki"],
+    "license": "MIT",
+    "homepage": "https://github.com/IT-Shura/MediaWiki-SDK",
+    "require": {
+        "guzzlehttp/guzzle": "^6.2",
+        "symfony/console": "^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^4.8",
+        "mockery/mockery": "0.9.*"
+    },
+    "authors": [
+        {
+            "name": "Imangazaliev Muhammad",
+            "email": "imangazalievm@gmail.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "MediaWiki\\": "src/MediaWiki/"
+        },
+        "files": [
+            "src/MediaWiki/helpers.php"
+        ]
+    },
+    "autoload-dev": {
+        "psr-4": { 
+            "Tests\\": "tests/"
+        }
+    }
+}
