@@ -12,6 +12,7 @@ MediaWiki SDK - библиотека для работы с API MediaWiki.
 - [Установка](#Установка)
 - [Быстрый старт](#Быстрый-старт)
 - [Авторизация](#Авторизация)
+- [Выполнение запроса](#Выполнение-запроса)
 
 ## Установка
 
@@ -54,3 +55,36 @@ var_dump($api->isLoggedIn());
 // выход
 $api->logout();
 ```
+
+## Выполнение запроса
+
+```php
+$parameters = [
+    'action' => 'query',
+    'list' => 'allpages',
+];
+
+$response = $this->request('POST', $parameters);
+
+// или
+
+$parameters = [
+    'list' => 'allpages',
+];
+
+$response = $api->query($parameters);
+
+var_dump($response);
+```
+
+### Параметры метода `request`
+
+- **method** - HTTP-метод (POST/GET)
+- **parameters** - параметры запроса (опционально)
+- **headers** - заголовки запроса (опционально)
+- **decode** - декодирует запрос, если передан параметр `true`  (только json, опционально)
+
+### Параметры метода `query`
+
+- **parameters** - параметры запроса
+- **decode** - декодирует запрос, если передан параметр `true`  (только json, опционально)
