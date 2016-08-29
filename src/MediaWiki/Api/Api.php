@@ -109,8 +109,8 @@ class Api
 
         $parameters = array_merge($this->getDefaultParameters(), $parameters);
 
-        if ($decode) {
-            $parameters['format'] = 'json';
+        if ($decode and (strtolower($parameters['format']) !== 'json')) {
+            throw new InvalidArgumentException('Only JSON can be decoded. Specify JSON format or disable decoding.');
         } 
 
         $response = $this->client->request($method, $this->url, $parameters, $headers, $this->cookies);
