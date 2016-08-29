@@ -179,6 +179,8 @@ class Api
         if ($this->cookies !== []) {
             return true;
         }
+
+        return false;
     }
 
     /**
