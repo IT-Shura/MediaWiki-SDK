@@ -93,15 +93,25 @@ class Api
 
     /**
      * @param strting $method HTTP method name
-     * @param array   $parameters
-     * @param array   $headers
-     * @param bool    $decode
+     * @param array|string $parameters
+     * @param array $headers
+     * @param bool $decode
      * 
      * @return string|array
      */
     public function request($method, $parameters = [], $headers = [], $decode = true)
     {
+        if (is_string($parameters)) {
+            parse_str($parameters, $result);
+
+            $parameters = $result;
+        }
+
         $parameters = array_merge($this->getDefaultParameters(), $parameters);
+
+        if ($decode) {
+            $parameters['format'] = 'json';
+        } 
 
         $response = $this->client->request($method, $this->url, $parameters, $headers, $this->cookies);
 
@@ -206,10 +216,16 @@ class Api
     /**
      * @param  array $parameters
      * 
-     * @return array
+     * @return array|string
      */
     public function query($parameters, $decode = true)
     {
+        if (is_string($parameters)) {
+            parse_str($parameters, $result);
+
+            $parameters = $result;
+        }
+
         $parameters = array_merge($parameters, ['action' => 'query']);
 
         return $this->request('POST', $parameters, [], $decode);
