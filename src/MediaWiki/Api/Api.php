@@ -269,7 +269,11 @@ class Api
             $parameters = $result;
         }
 
-        $parameters = array_merge($parameters, ['action' => 'query']);
+        if (array_key_exists('action', $parameters) and strtolower($parameters['action']) !== 'query') {
+            throw new InvalidArgumentException('Invalid action. Omit action parameter or use request() method.');
+        }
+
+        $parameters = array_merge(['action' => 'query'], $parameters);
 
         return $this->request('POST', $parameters, [], $decode);
     }

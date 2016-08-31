@@ -168,15 +168,11 @@ class ApiTest extends TestCase
      */
     public function testRequestDecodeNotJson()
     {
-        $method = 'GET';
         $url = 'http://wikipedia.org/w/api.php';
 
         $defaultParameters = ['format' => 'json'];
         $parameters = ['action' => 'query', 'format' => 'xml'];
 
-        $expectedResponse = ['foo' => 'bar'];
-
-        $headers = [];
         $cookies = [];
 
         $client = Mockery::mock(HttpClientInterface::class);
@@ -254,5 +250,28 @@ class ApiTest extends TestCase
         $result = $api->login($username, $password);
 
         $this->assertTrue($result);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testQueryWithInvaldAction()
+    {
+        $url = 'http://wikipedia.org/w/api.php';
+
+        $parameters = ['action' => 'parse'];
+
+        $cookies = [];
+
+        $client = Mockery::mock(HttpClientInterface::class);
+        $storage = Mockery::mock(StorageInterface::class);
+
+        $key = sprintf('%s.cookies', $url);
+
+        $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
+
+        $api = new Api($url, $client, $storage);
+
+        $response = $api->query($parameters);
     }
 }
