@@ -72,6 +72,63 @@ class ApiTest extends TestCase
         $this->assertEquals($storage, $api->getStorage());
     }
 
+    public function testQueryLog()
+    {
+        $method = 'GET';
+        $url = 'http://wikipedia.org/w/api.php';
+
+        $defaultParameters = ['format' => 'json'];
+        $parameters = ['action' => 'query'];
+
+        $expectedResponse = ['foo' => 'bar'];
+
+        $headers = [];
+        $cookies = [];
+
+        $client = Mockery::mock(HttpClientInterface::class);
+
+        $expectedParameters = array_merge($defaultParameters, $parameters);
+
+        $arguments = [$method, $url, $expectedParameters, $headers, $cookies];
+
+        $client->shouldReceive('request')->times(3)->withArgs($arguments)->andReturn(json_encode($expectedResponse));
+
+        $storage = Mockery::mock(StorageInterface::class);
+
+        $key = sprintf('%s.cookies', $url);
+
+        $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
+
+        $api = new Api($url, $client, $storage);
+
+        $this->assertEquals([], $api->getQueryLog());
+
+        $response = $api->request($method, $parameters);
+
+        $this->assertEquals([], $api->getQueryLog());
+
+        $api->enableQueryLog();
+
+        $response = $api->request($method, $parameters);
+
+        $expectedLog = [
+            [
+                'method' => $method,
+                'parameters' => $expectedParameters,
+                'headers' => $headers,
+                'cookies' => $cookies,
+            ]
+        ];
+
+        $this->assertEquals($expectedLog, $api->getQueryLog());
+
+        $api->disableQueryLog();
+
+        $response = $api->request($method, $parameters);
+
+        $this->assertEquals($expectedLog, $api->getQueryLog());
+    }
+
     public function testRequest()
     {
         $method = 'GET';
@@ -89,7 +146,7 @@ class ApiTest extends TestCase
 
         $expectedParameters = array_merge($defaultParameters, $parameters);
 
-        $arguments = ['GET', $url, $expectedParameters, $headers, $cookies];
+        $arguments = [$method, $url, $expectedParameters, $headers, $cookies];
 
         $client->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
 
@@ -101,7 +158,7 @@ class ApiTest extends TestCase
 
         $api = new Api($url, $client, $storage);
 
-        $response = $api->request('GET', $parameters);
+        $response = $api->request($method, $parameters);
 
         $this->assertEquals($expectedResponse, $response);
     }

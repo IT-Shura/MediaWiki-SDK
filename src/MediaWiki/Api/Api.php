@@ -37,6 +37,16 @@ class Api
     private $version;
 
     /**
+     * @var bool
+     */
+    protected $logQueries = false;
+
+    /**
+     * @var array
+     */
+    protected $queryLog = [];
+
+    /**
      * Constructor.
      * 
      * @param string $url
@@ -92,6 +102,30 @@ class Api
     }
 
     /**
+     * Enables query logging.
+     */
+    public function enableQueryLog()
+    {
+        $this->logQueries = true;
+    }
+
+    /**
+     * Disables query logging.
+     */
+    public function disableQueryLog()
+    {
+        $this->logQueries = false;
+    }
+
+    /**
+     * @return array
+     */
+    public function getQueryLog()
+    {
+        return $this->queryLog;
+    }
+
+    /**
      * @param strting $method HTTP method name
      * @param array|string $parameters
      * @param array $headers
@@ -111,7 +145,16 @@ class Api
 
         if ($decode and (strtolower($parameters['format']) !== 'json')) {
             throw new InvalidArgumentException('Only JSON can be decoded. Specify JSON format or disable decoding.');
-        } 
+        }
+
+        if ($this->logQueries) {
+            $this->queryLog[] = [
+                'method' => $method,
+                'parameters' => $parameters,
+                'headers' => $headers,
+                'cookies' => $this->cookies,
+            ]; 
+        }
 
         $response = $this->client->request($method, $this->url, $parameters, $headers, $this->cookies);
 
