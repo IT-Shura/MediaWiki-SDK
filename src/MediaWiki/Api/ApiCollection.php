@@ -23,7 +23,7 @@ class ApiCollection
     /**
      * @param string $language
      * 
-     * @return Mediawiki\Api\Api
+     * @return Api
      */
     public function get($language)
     {
