@@ -17,7 +17,7 @@ class Pages extends Service
      * 
      * @return array
      */
-    public function getList($language, $continue = null, $apcontinue = null, $extParameters = [)
+    public function getList($language, $continue = null, $apcontinue = null, $extParameters = [])
     {
         $parameters = [
             'list' => 'allpages',
@@ -62,7 +62,7 @@ class Pages extends Service
         }
 
         if (is_array($properties)) {
-            $properties = implode('|', $properties)
+            $properties = implode('|', $properties);
         }
 
         $parameters = [
@@ -119,11 +119,14 @@ class Pages extends Service
 
         $parameters = [
             'action' => 'parse',
-            'title' => $title,
-            'properties' => $properties,
+            'page' => $title,
             'disableeditsection' => true,
             'disablelimitreport' => true,
         ];
+
+        if ($properties !== '') {
+            $parameters['prop'] = $properties;
+        }
 
         $parameters = array_merge($parameters, $extParameters);
 
