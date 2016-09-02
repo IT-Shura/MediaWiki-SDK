@@ -4,8 +4,19 @@ namespace MediaWiki\Services;
 
 class Pages extends Service
 {
+    /**
+     * @var array
+     */
     protected $tokens = [];
 
+    /**
+     * @param string $language
+     * @param string $continue
+     * @param string $apcontinue
+     * @param array $extParameters
+     * 
+     * @return array
+     */
     public function getList($language, $continue = null, $apcontinue = null, $extParameters = [)
     {
         $parameters = [
@@ -36,7 +47,47 @@ class Pages extends Service
         ];
     }
 
-    public function savePage($language, $title, $content)
+    /**
+     * @param string $language
+     * @param string $title
+     * @param array $properties
+     * @param array $extParameters
+     * 
+     * @return array
+     */
+    public function loadPage($language, $title, $properties = null, $extParameters = [])
+    {
+        if ($title === '') {
+            throw new InvalidArgumentException(sprintf('Title must not be empty (%s)', $language));
+        }
+
+        if (is_array($properties)) {
+            $properties = implode('|', $properties)
+        }
+
+        $parameters = [
+            'titles' => $title,
+            'prop' => $properties,
+        ];
+
+        $parameters = array_merge($parameters, $extParameters);
+
+        $response = $this->project->api($language)->query($parameters);
+
+        $page = array_shift($response['query']['pages']);
+
+        return $page;
+    }
+
+    /**
+     * @param string $language
+     * @param string $title
+     * @param string $content
+     * @param array $extParameters
+     * 
+     * @return array
+     */
+    public function savePage($language, $title, $content, $extParameters = [])
     {
         $token = $this->getCsrfToken($language);
 
@@ -49,9 +100,41 @@ class Pages extends Service
             'token' => $token,
         ];
 
+        $parameters = array_merge($parameters, $extParameters);
+
         return $this->api($language)->request('POST', $parameters);
     }
 
+    /**
+     * @param string $language
+     * @param string $title
+     * @param string|array $properties
+     * @param array $extParameters
+     * 
+     * @return array
+     */
+    public function parse($language, $title, $properties = [], $extParameters = [])
+    {
+        $properties = is_array($properties) ? implode('|', $properties) : $properties;
+
+        $parameters = [
+            'action' => 'parse',
+            'title' => $title,
+            'properties' => $properties,
+            'disableeditsection' => true,
+            'disablelimitreport' => true,
+        ];
+
+        $parameters = array_merge($parameters, $extParameters);
+
+        return $this->api($language)->request('POST', $parameters);
+    }
+
+    /**
+     * @param string $language
+     * 
+     * @return string
+     */
     protected function getCsrfToken($language)
     {
         if (!array_key_exists($language, $this->tokens)) {

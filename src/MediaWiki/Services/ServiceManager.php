@@ -8,11 +8,6 @@ use RuntimeException;
 class ServiceManager
 {
     /**
-     * @var MediaWiki\Api\ApiCollection
-     */
-    protected $api;
-
-    /**
      * @var array
      */
     protected $services = [
@@ -21,9 +16,14 @@ class ServiceManager
     ];
 
     /**
-     * @var array
+     * @var Service[]
      */
     protected $instances = [];
+
+    /**
+     * @var ApiCollection
+     */
+    protected $api;
 
     /**
      * Constructor.
