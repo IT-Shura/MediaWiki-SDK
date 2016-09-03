@@ -12,6 +12,18 @@ class ApiCollection
     protected $api = [];
 
     /**
+     * Constructor.
+     * 
+     * @param array $api
+     */
+    public function __construct($api = [])
+    {
+        foreach ($api as $language => $instance) {
+            $this->add($language, $instance);
+        }
+    }
+
+    /**
      * @param string $language
      * @param Api    $api
      */
@@ -32,6 +44,14 @@ class ApiCollection
         }
 
         throw new InvalidArgumentException(sprintf('API with code "%s" not found', $language));
+    }
+
+    /**
+     * @return array
+     */
+    public function getAll()
+    {
+        return $this->api;
     }
 
     /**
