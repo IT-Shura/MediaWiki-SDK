@@ -4,9 +4,9 @@ namespace Tests\MediaWiki;
 
 use Mediawiki\HttpClient\HttpClientInterface;
 use Mediawiki\Storage\StorageInterface;
-use Tests\Stubs\ProjectExample;
 use MediaWiki\Api\ApiCollection;
 use MediaWiki\Api\Api;
+use Tests\Stubs\ProjectExample;
 use Tests\TestCase;
 use Mockery;
 
@@ -75,20 +75,6 @@ class ProjectTest extends TestCase
         $this->assertEquals($ruApi, $project->api('ru'));
     }
 
-    public function createApi()
-    {
-        $url = 'http://wikipedia.org/w/api.php';
-
-        $client = Mockery::mock(HttpClientInterface::class);
-        $storage = Mockery::mock(StorageInterface::class);
-
-        $key = sprintf('%s.cookies', $url);
-
-        $storage->shouldReceive('get')->once()->with($key, [])->andReturn([]);
-
-        return new Api($url, $client, $storage);
-    }
-
     public function testGetApiUrls()
     {
         $apiCollection = new ApiCollection();
@@ -113,5 +99,19 @@ class ProjectTest extends TestCase
         ];
 
         $this->assertEquals($expectation, $project->getApiUsernames());
+    }
+
+    protected function createApi()
+    {
+        $url = 'http://wikipedia.org/w/api.php';
+
+        $client = Mockery::mock(HttpClientInterface::class);
+        $storage = Mockery::mock(StorageInterface::class);
+
+        $key = sprintf('%s.cookies', $url);
+
+        $storage->shouldReceive('get')->once()->with($key, [])->andReturn([]);
+
+        return new Api($url, $client, $storage);
     }
 }
