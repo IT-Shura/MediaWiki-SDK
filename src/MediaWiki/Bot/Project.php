@@ -10,6 +10,16 @@ use LogicException;
 class Project
 {
     /**
+     * @var ApiCollection
+     */
+    protected $api;
+
+    /**
+     * @var ServiceManager
+     */
+    protected $services;
+
+    /**
      * @var string
      */
     protected $name;
@@ -23,11 +33,6 @@ class Project
      * @var string
      */
     protected $defaultLanguage;
-
-    /**
-     * @var ApiCollection
-     */
-    protected $api;
 
     /**
      * Constructor.

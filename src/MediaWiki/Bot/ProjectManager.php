@@ -8,7 +8,7 @@ use MediaWiki\Api\ApiCollection;
 use MediaWiki\Services\ServiceManager;
 use Mediawiki\HttpClient\HttpClientInterface;
 use Mediawiki\Storage\StorageInterface;
-use InvalidArgumentException;
+use RuntimeException;
 
 class ProjectManager
 {
@@ -16,6 +16,11 @@ class ProjectManager
      * @var string
      */
     protected $projectsFolder;
+
+    /**
+     * @var string
+     */
+    protected $namespace = '';
 
     /**
      * Constructor.
@@ -30,7 +35,29 @@ class ProjectManager
     }
 
     /**
+     * @param string $namespace
+     * 
+     * @return ProjectManager
+     */
+    public function setNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getNamespace()
+    {
+        return $this->namespace;
+    }
+
+    /**
      * @param string $name The name of the project
+     * 
+     * @return bool
      */
     public function projectExists($name)
     {
@@ -41,13 +68,17 @@ class ProjectManager
 
     /**
      * @param string $name The name of the project
+     * 
+     * @return Project
+     * 
+     * @throws RuntimeException if project does not exists
      */
     public function loadProject($name)
     {
         $filename = sprintf('%s/%s.php', $this->projectsFolder, $name);
 
         if (!file_exists($filename)) {
-            throw new InvalidArgumentException(sprintf('Project with name "%s" does not exists', $name));
+            throw new RuntimeException(sprintf('Project with name "%s" does not exists', $name));
         }
 
         $apiCollection = new ApiCollection();
@@ -55,7 +86,7 @@ class ProjectManager
 
         require_once $filename;
 
-        $class = Helpers\pascal_case($name);
+        $class = sprintf('%s\%s', $this->namespace, Helpers\pascal_case($name));
 
         $project = new $class($apiCollection, $serviceManager);
 
@@ -120,13 +151,5 @@ class ProjectManager
     public function getStorage()
     {
         return $this->storage;
-    }
-
-    /**
-     * @return ServiceManager
-     */
-    public function getServiceManager()
-    {
-        return $this->serviceManager;
     }
 }

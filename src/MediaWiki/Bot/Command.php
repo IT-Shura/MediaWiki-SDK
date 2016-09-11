@@ -14,11 +14,20 @@ use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use MediaWiki\Storage\StorageInterface;
-use MediaWiki\Services\ServiceManager;
 
 class Command extends SymfonyCommand
 {
     use AuthTrait;
+
+    /**
+     * @var StorageInterface
+     */
+    protected $storage;
+
+    /**
+     * @var MediaWiki\Bot\Project
+     */
+    protected $project;
 
     /**
      * @var MediaWiki\Bot\CommandManager
@@ -26,19 +35,14 @@ class Command extends SymfonyCommand
     protected $commandManager;
 
     /**
-     * @var MediaWiki\Services\ServiceManager
+     * @var InputInterface
      */
-    protected $serviceManager;
+    protected $input;
 
     /**
-     * @var MediaWiki\Bot\ProjectManager
+     * @var OutputInterface
      */
-    protected $projectManager;
-
-    /**
-     * @var MediaWiki\Bot\Project
-     */
-    protected $project;
+    protected $output;
 
     /**
      * The console command name.
@@ -53,11 +57,6 @@ class Command extends SymfonyCommand
      * @var string
      */
     protected $description;
-
-    /**
-     * @var StorageInterface
-     */
-    protected $storage;
 
     /**
      * Constructor.
@@ -90,22 +89,6 @@ class Command extends SymfonyCommand
     }
 
     /**
-     * @param ProjectManager $projectManager
-     */
-    public function setProjectManager(ProjectManager $projectManager)
-    {
-        $this->projectManager = $projectManager;
-    }
-
-    /**
-     * @param ServiceManager
-     */
-    public function setServiceManager(ServiceManager $serviceManager)
-    {
-        $this->serviceManager = $serviceManager;
-    }
-
-    /**
      * @return Project
      */
     public function getProject()
@@ -114,33 +97,35 @@ class Command extends SymfonyCommand
     }
 
     /**
-     * @return ProjectManager
+     * @param InputInterface $output
      */
-    public function getProjectManager()
+    public function setInput(InputInterface $input)
     {
-        return $this->projectManager;
+        $this->input = $input;
     }
 
     /**
-     * @return ServiceManager
+     * @return InputInterface|null
      */
-    public function getServiceManager()
+    public function getInput()
     {
-        return $this->serviceManager = $serviceManager;
+        return $this->input;
     }
 
     /**
-     * Configures the current command.
+     * @param OutputInterface $output
      */
-    protected function configure()
+    public function setOutput(OutputInterface $output)
     {
-        foreach ($this->getArguments() as $argument) {
-            $this->addArgument($argument[0], $argument[1], $argument[2], $argument[3]);
-        }
+        $this->output = $output;
+    }
 
-        foreach ($this->getOptions() as $option) {
-            $this->addOption($option[0], $option[1], $option[2], $option[3], $option[4]);
-        }
+    /**
+     * @return OutputInterface|null
+     */
+    public function getOutput()
+    {
+        return $this->output;
     }
 
     /**
@@ -416,7 +401,7 @@ class Command extends SymfonyCommand
      * @param string  $string
      * @param null|int|string  $verbosity
      */
-    public function warn($string, $verbosity = null)
+    public function warning($string, $verbosity = null)
     {
         if (!$this->output->getFormatter()->hasStyle('warning')) {
             $style = new OutputFormatterStyle('yellow');
@@ -425,6 +410,20 @@ class Command extends SymfonyCommand
         }
 
         $this->line($string, 'warning', $verbosity);
+    }
+
+    /**
+     * Configures the current command.
+     */
+    protected function configure()
+    {
+        foreach ($this->getArguments() as $argument) {
+            $this->addArgument($argument[0], $argument[1], $argument[2], $argument[3]);
+        }
+
+        foreach ($this->getOptions() as $option) {
+            $this->addOption($option[0], $option[1], $option[2], $option[3], $option[4]);
+        }
     }
 
     /**
