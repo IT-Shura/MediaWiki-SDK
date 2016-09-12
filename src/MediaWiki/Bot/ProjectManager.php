@@ -9,9 +9,20 @@ use MediaWiki\Services\ServiceManager;
 use Mediawiki\HttpClient\HttpClientInterface;
 use Mediawiki\Storage\StorageInterface;
 use RuntimeException;
+use InvalidArgumentException;
 
 class ProjectManager
 {
+    /**
+     * @var HttpClientInterface
+     */
+    protected $client;
+
+    /**
+     * @var StorageInterface
+     */
+    protected $storage;
+
     /**
      * @var string
      */
@@ -25,13 +36,15 @@ class ProjectManager
     /**
      * Constructor.
      * 
+     * @param HttpClientInterface $client
+     * @param StorageInterface $storage
      * @param string $projectsFolder
      */
-    public function __construct(HttpClientInterface $client, StorageInterface $storage, $projectsFolder)
+    public function __construct(HttpClientInterface $client, StorageInterface $storage, $projectsFolder = null)
     {
-        $this->projectsFolder = $projectsFolder;
         $this->client = $client;
         $this->storage = $storage;
+        $this->projectsFolder = $projectsFolder;
     }
 
     /**
@@ -81,20 +94,68 @@ class ProjectManager
             throw new RuntimeException(sprintf('Project with name "%s" does not exists', $name));
         }
 
-        $apiCollection = new ApiCollection();
-        $serviceManager = new ServiceManager($apiCollection);
-
         require_once $filename;
 
         $class = sprintf('%s\%s', $this->namespace, Helpers\pascal_case($name));
 
-        $project = new $class($apiCollection, $serviceManager);
+        return $this->createProject([], [], $class);
+    }
+
+    /**
+     * @param  array  $apiUrls
+     * @param  array  $apiUsernames
+     * @param  Project|string $class
+     * 
+     * @return Project
+     */
+    public function createProject($apiUrls = [], $apiUsernames = [], $class = Project::class)
+    {
+        if (is_string($class)) {
+            if (!class_exists($class)) {
+                throw new InvalidArgumentException(sprintf('Class "%s" does not exists', $class));
+            }
+
+            $project = new $class();
+        } else {
+            $project = $class;
+        }
+
+        if (!$project instanceof Project) {
+            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s, %s given', __METHOD__, Project::class, (is_object($project) ? get_class($project) : gettype($project))));
+        }
+
+        if (!is_array($apiUrls)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 2 to be array, %s given', __METHOD__, gettype($format)));
+        }
+
+        if (!is_array($apiUsernames)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 3 to be array, %s given', __METHOD__, gettype($format)));
+        }
+
+        if (!empty($apiUrls)) {
+            foreach ($apiUrls as $language => $url) {
+                $project->setApiUrl($language, $url);
+            }
+        }
+
+        if (!empty($apiUsernames)) {
+            foreach ($apiUsernames as $language => $username) {
+                $project->setApiUsername($language, $username);
+            }
+        }
+
+        $apiCollection = new ApiCollection();
 
         foreach ($project->getApiUrls() as $language => $url) {
             $api = new Api($url, $this->client, $this->storage);
 
-            $project->addApi($language, $api);
+            $apiCollection->add($language, $api);
         }
+
+        $serviceManager = new ServiceManager($apiCollection);
+
+        $project->setApiCollection($apiCollection);
+        $project->setServiceManager($serviceManager);
 
         return $project;
     }

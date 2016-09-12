@@ -35,15 +35,26 @@ class Project
     protected $defaultLanguage;
 
     /**
+     * @var array
+     */
+    protected $apiUsernames = [];
+
+    /**
+     * @var array
+     */
+    protected $apiUrls = [];
+
+    /**
      * Constructor.
      * 
      * @param ApiCollection $api
      * @param ServiceManager $services
      */
-    public function __construct(ApiCollection $api, ServiceManager $services = null)
+    public function __construct(ApiCollection $api = null, ServiceManager $services = null)
     {
-        $this->api = $api;
-        $this->services = $services;
+        $this->api = $api === null ? new ApiCollection() : $api;
+
+        $this->services = $services === null ? new ServiceManager($this->api) : $services;
     }
 
     /**
@@ -106,11 +117,35 @@ class Project
     }
 
     /**
+     * @param ApiCollection $api
+     * 
+     * @return Project
+     */
+    public function setApiCollection(ApiCollection $api)
+    {
+        $this->api = $api;
+
+        return $this;
+    }
+
+    /**
      * @return ApiCollection
      */
     public function getApiCollection()
     {
         return $this->api;
+    }
+
+    /**
+     * @param ServiceManager $api
+     * 
+     * @return Project
+     */
+    public function setServiceManager(ServiceManager $services)
+    {
+        $this->services = $services;
+
+        return $this;
     }
 
     /**
@@ -122,11 +157,29 @@ class Project
     }
 
     /**
+     * @param string $language
+     * @param string $url
+     */
+    public function setApiUrl($language, $url)
+    {
+        $this->apiUrls[$language] = $url;
+    }
+
+    /**
      * @return array
      */
     public function getApiUrls()
     {
-        return [];
+        return $this->apiUrls;
+    }
+
+    /**
+     * @param string $language
+     * @param string $username
+     */
+    public function setApiUsername($language, $username)
+    {
+        $this->apiUsernames[$language] = $username;
     }
 
     /**
@@ -134,6 +187,6 @@ class Project
      */
     public function getApiUsernames()
     {
-        return [];
+        return $this->apiUsernames;
     }
 }
