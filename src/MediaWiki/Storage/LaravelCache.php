@@ -14,13 +14,36 @@ class LaravelCache implements StorageInterface
     protected $cache;
 
     /**
+     * @var string
+     */
+    protected $prefix;
+
+    /**
      * Constructor.
      *
      * @param Illuminate\Cache\CacheManager $cache
+     * @param string $prefix
      */
-    public function __construct(CacheManager $cache)
+    public function __construct(CacheManager $cache, $prefix = '')
     {
         $this->cache = $cache;
+        $this->prefix = $prefix;
+    }
+
+    /**
+     * @return Illuminate\Cache\CacheManager
+     */
+    public function getCache()
+    {
+        return $this->cache;
+    }
+
+    /**
+     * @return string
+     */
+    public function getPrefix()
+    {
+        return $this->prefix;
     }
 
     /**
@@ -33,7 +56,7 @@ class LaravelCache implements StorageInterface
      */
     public function get($key, $default = null)
     {
-        return $this->cache->get($key, $default);
+        return $this->cache->get($this->prefix.$key, $default);
     }
 
     /**
@@ -45,7 +68,7 @@ class LaravelCache implements StorageInterface
      */
     public function put($key, $value, $minutes)
     {
-        $this->cache->put($key, $value, $minutes);
+        $this->cache->put($this->prefix.$key, $value, $minutes);
     }
 
     /**
@@ -58,7 +81,7 @@ class LaravelCache implements StorageInterface
      */
     public function increment($key, $value = 1)
     {
-        return $this->cache->increment($key, $value);
+        return $this->cache->increment($this->prefix.$key, $value);
     }
 
     /**
@@ -71,7 +94,7 @@ class LaravelCache implements StorageInterface
      */
     public function decrement($key, $value = 1)
     {
-        return $this->cache->decrement($key, $value);
+        return $this->cache->decrement($this->prefix.$key, $value);
     }
 
     /**
@@ -82,7 +105,7 @@ class LaravelCache implements StorageInterface
      */
     public function forever($key, $value)
     {
-        $this->cache->forever($key, $value);
+        $this->cache->forever($this->prefix.$key, $value);
     }
 
     /**
@@ -94,7 +117,7 @@ class LaravelCache implements StorageInterface
      */
     public function forget($key)
     {
-        return $this->cache->forget($key);
+        return $this->cache->forget($this->prefix.$key);
     }
 
     /**
