@@ -30,7 +30,7 @@ class Pages extends Service
 
         $parameters = array_merge($parameters, $extParameters);
 
-        $response = $this->project->api($language)->query($parameters);
+        $response = $this->api($language)->query($parameters);
 
         if (array_key_exists('continue', $response)) {
             $continue = $response['continue']['continue'];
@@ -72,7 +72,7 @@ class Pages extends Service
 
         $parameters = array_merge($parameters, $extParameters);
 
-        $response = $this->project->api($language)->query($parameters);
+        $response = $this->api($language)->query($parameters);
 
         $page = array_shift($response['query']['pages']);
 
