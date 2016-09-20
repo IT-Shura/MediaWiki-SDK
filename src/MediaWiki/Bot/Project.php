@@ -74,6 +74,18 @@ class Project
     }
 
     /**
+     * @param string
+     * 
+     * @return Project
+     */
+    public function setDefaultLanguage($language)
+    {
+        $this->defaultLanguage = $language;
+
+        return $this;
+    }
+
+    /**
      * @return string
      */
     public function getDefaultLanguage()

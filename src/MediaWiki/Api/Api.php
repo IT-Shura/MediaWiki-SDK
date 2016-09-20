@@ -47,6 +47,13 @@ class Api
     protected $queryLog = [];
 
     /**
+     * @var array
+     */
+    protected $defaultParameters = [
+        'format' => 'json',
+    ];
+
+    /**
      * Constructor.
      * 
      * @param string $url
@@ -178,11 +185,27 @@ class Api
     }
 
     /**
+     * @param array $parameters
+     * 
+     * @return Api
+     */
+    public function setDefaultParameters($parameters)
+    {
+        if (!is_array($parameters)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, gettype($parameters)));
+        }
+
+        $this->defaultParameters = $parameters;
+
+        return $this;
+    }
+
+    /**
      * @return array
      */
-    protected function getDefaultParameters()
+    public function getDefaultParameters()
     {
-        return ['format' => 'json'];
+        return $this->defaultParameters;
     }
 
     /**

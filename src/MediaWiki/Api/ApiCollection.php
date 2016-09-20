@@ -63,4 +63,50 @@ class ApiCollection
     {
         return array_key_exists($language, $this->api);
     }
+
+    /**
+     * @return string[]
+     */
+    public function getLanguages()
+    {
+        return array_keys($this->api);
+    }
+
+    /**
+     * @return Project
+     */
+    public function enableQueryLog()
+    {
+        foreach ($this->api as $language => $api) {
+            $api->enableQueryLog();
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Project
+     */
+    public function disableQueryLog()
+    {
+        foreach ($this->api as $language => $api) {
+            $api->disableQueryLog();
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getQueryLog()
+    {
+        $log = [];
+
+        foreach ($this->api as $language => $api) {
+            $log[$language] = $api->getQueryLog();
+        }
+
+        return $log;
+    }
 }

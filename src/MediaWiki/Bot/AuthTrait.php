@@ -75,11 +75,25 @@ trait AuthTrait
     }
 
     /**
-     * @return bool
+     * @param string|array $languages
      */
-    public function logout($language = null)
+    public function logout($languages = null)
     {
-        return $this->project->api($language)->logout();
+        if (is_string($languages)) {
+            if ($languages === '*') {
+                $languages = $this->project->getApiCollection()->getLanguages();
+            } else {
+                $languages = explode(',', $languages);
+            }
+        }
+
+        if ($languages === null) {
+            $languages = [$this->project->getDefaultLanguage()];
+        }
+
+        foreach ($languages as $language) {
+            $this->project->api($language)->logout();
+        }
     }
 
     /**
