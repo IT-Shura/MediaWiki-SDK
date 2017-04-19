@@ -2,12 +2,12 @@
 
 namespace MediaWiki\Bot;
 
+use LogicException;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Style\SymfonyStyle as OutputStyle;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Exception\LogicException;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
@@ -67,7 +67,7 @@ class Command extends SymfonyCommand
      */
     public function __construct(StorageInterface $storage = null, Project $project = null, CommandManager $commandManager = null)
     {
-        if (!$this->name) {
+        if ($this->name === null) {
             throw new LogicException(sprintf('The command defined in "%s" cannot have an empty name', get_class($this)));
         }
 
