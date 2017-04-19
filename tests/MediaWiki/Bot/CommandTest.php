@@ -171,7 +171,7 @@ class CommandTest extends TestCase
     {
         $command = new CommandExample();
 
-        $output = Mockery::mock(OutputInterface::class)->shouldReceive('confirm')->once()->with('foo', true)->andReturn('bar')->getMock();;
+        $output = Mockery::mock(OutputInterface::class)->shouldReceive('confirm')->once()->with('foo', true)->andReturn('bar')->getMock();
 
         $command->setOutput($output);
 
@@ -182,7 +182,7 @@ class CommandTest extends TestCase
     {
         $command = new CommandExample();
 
-        $output = Mockery::mock(OutputInterface::class)->shouldReceive('ask')->once()->with('foo', 'bar')->andReturn('foo')->getMock();;
+        $output = Mockery::mock(OutputInterface::class)->shouldReceive('ask')->once()->with('foo', 'bar')->andReturn('foo')->getMock();
 
         $command->setOutput($output);
 
@@ -211,7 +211,7 @@ class CommandTest extends TestCase
             }
 
             return true;
-        })->andReturn('baz')->getMock();;
+        })->andReturn('baz')->getMock();
 
         $command->setOutput($output);
 
@@ -240,7 +240,7 @@ class CommandTest extends TestCase
             }
 
             return true;
-        })->andReturn('baz')->getMock();;
+        })->andReturn('baz')->getMock();
 
         $command->setOutput($output);
 
@@ -269,7 +269,7 @@ class CommandTest extends TestCase
             }
 
             return true;
-        })->andReturn('baz')->getMock();;
+        })->andReturn('baz')->getMock();
 
         $command->setOutput($output);
 
@@ -302,7 +302,7 @@ class CommandTest extends TestCase
             }
 
             return true;
-        })->andReturn('baz')->getMock();;
+        })->andReturn('baz')->getMock();
 
         $command->setOutput($output);
 
