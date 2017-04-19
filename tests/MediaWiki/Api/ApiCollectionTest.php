@@ -26,11 +26,15 @@ class ApiCollectionTest extends TestCase
         $this->assertEquals($api, $apiCollection->getAll());
     }
 
-    /**
-     * @expectedException PHPUnit_Framework_Error
-     */
     public function testConstructorWithInvalidData()
     {
+        if (PHP_VERSION_ID >= 70000) {
+            $this->setExpectedException('TypeError');
+        } else {
+            $this->setExpectedException('PHPUnit_Framework_Error');
+        }
+
+
         $api = [
             'en' => null,
         ];
