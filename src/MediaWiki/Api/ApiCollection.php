@@ -73,7 +73,9 @@ class ApiCollection
     }
 
     /**
-     * @return Project
+     * Enables query logging for all APIs.
+     *
+     * @return ApiCollection
      */
     public function enableQueryLog()
     {
@@ -85,7 +87,9 @@ class ApiCollection
     }
 
     /**
-     * @return Project
+     * Disables query logging for all APIs.
+     *
+     * @return ApiCollection
      */
     public function disableQueryLog()
     {
@@ -97,6 +101,8 @@ class ApiCollection
     }
 
     /**
+     * Returns query logs from all APIs.
+     *
      * @return array
      */
     public function getQueryLog()

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\MediaWiki;
+namespace Tests\MediaWiki\Api;
 
 use Tests\TestCase;
 use MediaWiki\Api\Api;

@@ -32,11 +32,6 @@ class Api
     protected $cookies;
 
     /**
-     * @var string
-     */
-    private $version;
-
-    /**
      * @var bool
      */
     protected $logQueries = false;
@@ -52,6 +47,11 @@ class Api
     protected $defaultParameters = [
         'format' => 'json',
     ];
+
+    /**
+     * @var string
+     */
+    private $version;
 
     /**
      * Constructor.
@@ -151,7 +151,7 @@ class Api
         $parameters = array_merge($this->getDefaultParameters(), $parameters);
 
         if ($decode and (strtolower($parameters['format']) !== 'json')) {
-            throw new InvalidArgumentException('Only JSON can be decoded. Specify JSON format or disable decoding.');
+            throw new InvalidArgumentException('Only JSON can be decoded. Specify JSON format or disable decoding');
         }
 
         if ($this->logQueries) {
@@ -166,22 +166,37 @@ class Api
         $response = $this->client->request($method, $this->url, $parameters, $headers, $this->cookies);
 
         if ($decode) {
-            $response = json_decode($response, true);
-
-            if (json_last_error() !== JSON_ERROR_NONE) {
-                throw new RuntimeException(sprintf('API response is not valid JSON (%s)', $this->url));
-            }
-
-            if (array_key_exists('error', $response)) {
-                $error = $response['error'];
-
-                if ($error['code'] === 'readapidenied') {
-                    throw new AccessDeniedException($error['info'], $error['code']);
-                }
-            }
+            $response = $this->decodeResponse($response);
         }
 
         return $response;
+    }
+
+    /**
+     * @param string $response
+     *
+     * @return array
+     *
+     * @throws RuntimeException if response is not valid JSON
+     * @throws AccessDeniedException if access to API or section denied (e.g., unauthorized request)
+     */
+    protected function decodeResponse($response)
+    {
+        $decodedResponse = json_decode($response, true);
+
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            throw new RuntimeException(sprintf('API response is not valid JSON (%s)', $this->url));
+        }
+
+        if (array_key_exists('error', $decodedResponse)) {
+            $error = $decodedResponse['error'];
+
+            if ($error['code'] === 'readapidenied') {
+                throw new AccessDeniedException($error['info'], $error['code']);
+            }
+        }
+
+        return $decodedResponse;
     }
 
     /**
@@ -280,8 +295,9 @@ class Api
     }
 
     /**
-     * @param  array $parameters
-     * 
+     * @param array $parameters
+     * @param bool $decode
+     *
      * @return array|string
      */
     public function query($parameters, $decode = true)
@@ -293,7 +309,7 @@ class Api
         }
 
         if (array_key_exists('action', $parameters) and strtolower($parameters['action']) !== 'query') {
-            throw new InvalidArgumentException('Invalid action. Omit action parameter or use request() method.');
+            throw new InvalidArgumentException('Invalid action. Omit action parameter or use request() method');
         }
 
         $parameters = array_merge(['action' => 'query'], $parameters);

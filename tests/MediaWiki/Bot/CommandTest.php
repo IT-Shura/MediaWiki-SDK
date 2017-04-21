@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\MediaWiki;
+namespace Tests\MediaWiki\Bot;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\MediaWiki;
+namespace Tests\MediaWiki\Bot;
 
 use Mediawiki\HttpClient\HttpClientInterface;
 use Mediawiki\Storage\StorageInterface;
