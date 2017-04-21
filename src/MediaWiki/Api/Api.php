@@ -37,9 +37,9 @@ class Api
     protected $logQueries = false;
 
     /**
-     * @var array
+     * @var QueryLog
      */
-    protected $queryLog = [];
+    protected $queryLog;
 
     /**
      * @var array
@@ -63,6 +63,8 @@ class Api
     public function __construct($url, HttpClientInterface $client, StorageInterface $storage)
     {
         $this->setUrl($url);
+
+        $this->queryLog = new QueryLog();
 
         $this->client = $client;
         $this->storage = $storage;
@@ -132,11 +134,16 @@ class Api
     }
 
     /**
+     * Returns query log.
+     *
+     * @param string[]|null $fields
+     * @param int|null $count
+     *
      * @return array
      */
-    public function getQueryLog()
+    public function getQueryLog($fields = null, $count = null)
     {
-        return $this->queryLog;
+        return $this->queryLog->getLog($fields, $count);
     }
 
     /**
@@ -162,18 +169,17 @@ class Api
         }
 
         if ($this->logQueries) {
-            $this->queryLog[] = [
-                'method' => $method,
-                'parameters' => $parameters,
-                'headers' => $headers,
-                'cookies' => $this->cookies,
-            ]; 
+            $this->queryLog->logQuery($method, $parameters, $headers, $this->cookies);
         }
 
         $response = $this->client->request($method, $this->url, $parameters, $headers, $this->cookies);
 
         if ($decode) {
             $response = $this->decodeResponse($response);
+        }
+
+        if ($this->logQueries) {
+            $this->queryLog->appendResponse($response);
         }
 
         return $response;

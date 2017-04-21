@@ -72,26 +72,34 @@ class ApiTest extends TestCase
         $this->assertEquals($storage, $api->getStorage());
     }
 
-    public function testQueryLog()
+    public function testQueryLogging()
     {
         $method = 'GET';
         $url = 'http://wikipedia.org/w/api.php';
 
         $defaultParameters = ['format' => 'json'];
-        $parameters = ['action' => 'query'];
 
-        $expectedResponse = ['foo' => 'bar'];
+        $parameters1 = ['action' => 'query'];
+        $parameters2 = ['action' => 'query'];
+
+        $expectedParameters1 = array_merge($defaultParameters, $parameters1);
+        $expectedParameters2 = array_merge($defaultParameters, $parameters1);
+
+        $expectedResponse1 = ['foo' => 'bar'];
+        $expectedResponse2 = ['baz' => 'qux'];
 
         $headers = [];
         $cookies = [];
 
         $client = Mockery::mock(HttpClientInterface::class);
 
-        $expectedParameters = array_merge($defaultParameters, $parameters);
+        $arguments1 = [$method, $url, $expectedParameters1, $headers, $cookies];
+        $arguments2 = [$method, $url, $expectedParameters2, $headers, $cookies];
 
-        $arguments = [$method, $url, $expectedParameters, $headers, $cookies];
-
-        $client->shouldReceive('request')->times(3)->withArgs($arguments)->andReturn(json_encode($expectedResponse));
+        $client->shouldReceive('request')->once()->withArgs($arguments1)->andReturn(json_encode($expectedResponse1));
+        $client->shouldReceive('request')->once()->withArgs($arguments1)->andReturn(json_encode($expectedResponse1));
+        $client->shouldReceive('request')->once()->withArgs($arguments2)->andReturn(json_encode($expectedResponse2));
+        $client->shouldReceive('request')->once()->withArgs($arguments1)->andReturn(json_encode($expectedResponse1));
 
         $storage = Mockery::mock(StorageInterface::class);
 
@@ -103,30 +111,74 @@ class ApiTest extends TestCase
 
         $this->assertEquals([], $api->getQueryLog());
 
-        $response = $api->request($method, $parameters);
+        $api->request($method, $parameters1);
 
         $this->assertEquals([], $api->getQueryLog());
 
         $api->enableQueryLog();
 
-        $response = $api->request($method, $parameters);
+        $api->request($method, $parameters1);
+        $api->request($method, $parameters2);
 
         $expectedLog = [
             [
                 'method' => $method,
-                'parameters' => $expectedParameters,
+                'parameters' => $expectedParameters1,
                 'headers' => $headers,
                 'cookies' => $cookies,
-            ]
+                'response' => $expectedResponse1,
+            ],
+            [
+                'method' => $method,
+                'parameters' => $expectedParameters2,
+                'headers' => $headers,
+                'cookies' => $cookies,
+                'response' => $expectedResponse2,
+            ],
         ];
 
         $this->assertEquals($expectedLog, $api->getQueryLog());
 
         $api->disableQueryLog();
 
-        $response = $api->request($method, $parameters);
+        $api->request($method, $parameters1);
 
-        $this->assertEquals($expectedLog, $api->getQueryLog());
+        $expectedLog = [
+            [
+                'method' => $method,
+                'parameters' => $expectedParameters1,
+                'response' => $expectedResponse1,
+            ],
+            [
+                'method' => $method,
+                'parameters' => $expectedParameters2,
+                'response' => $expectedResponse2,
+            ],
+        ];
+
+        $this->assertEquals($expectedLog, $api->getQueryLog(['method', 'parameters', 'response']));
+
+        $expectedLog = [
+            [
+                'method' => $method,
+                'parameters' => $expectedParameters2,
+                'headers' => $headers,
+                'cookies' => $cookies,
+                'response' => $expectedResponse2,
+            ],
+        ];
+
+        $this->assertEquals($expectedLog, $api->getQueryLog(null, 1));
+
+        $expectedLog = [
+            [
+                'method' => $method,
+                'parameters' => $expectedParameters2,
+                'response' => $expectedResponse2,
+            ],
+        ];
+
+        $this->assertEquals($expectedLog, $api->getQueryLog(['method', 'parameters', 'response'], 1));
     }
 
     public function testRequest()

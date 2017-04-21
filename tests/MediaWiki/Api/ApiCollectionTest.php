@@ -229,5 +229,21 @@ class ApiCollectionTest extends TestCase
         ];
 
         $this->assertEquals($expectedQueryLog, $apiCollection->getQueryLog());
+
+        $api = Mockery::mock('overload:MediaWiki\Api\Api');
+
+        $api->shouldReceive('getQueryLog')->withArgs([null, null])->once();
+        $api->shouldReceive('getQueryLog')->withArgs([['method', 'response'], null])->once();
+        $api->shouldReceive('getQueryLog')->withArgs([null, 3])->once();
+        $api->shouldReceive('getQueryLog')->withArgs([['method', 'response'], 3])->once();
+
+        $apiCollection = new ApiCollection([
+            'en' => $api,
+        ]);
+
+        $apiCollection->getQueryLog();
+        $apiCollection->getQueryLog(['method', 'response']);
+        $apiCollection->getQueryLog(null, 3);
+        $apiCollection->getQueryLog(['method', 'response'], 3);
     }
 }

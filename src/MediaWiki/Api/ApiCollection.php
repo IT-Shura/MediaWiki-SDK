@@ -128,14 +128,17 @@ class ApiCollection
     /**
      * Returns query logs from all APIs.
      *
+     * @param string[]|null $fields
+     * @param int|null $count
+     *
      * @return array
      */
-    public function getQueryLog()
+    public function getQueryLog($fields = null, $count = null)
     {
         $log = [];
 
         foreach ($this->api as $language => $api) {
-            $log[$language] = $api->getQueryLog();
+            $log[$language] = $api->getQueryLog($fields, $count);
         }
 
         return $log;
