@@ -74,11 +74,18 @@ class Api
 
     /**
      * @param string $url
+     *
+     * @throws InvalidArgumentException if API URL is not string
+     * @throws RuntimeException if API address is not valid URL
      */
     protected function setUrl($url)
     {
         if (!is_string($url)) {
             throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, gettype($url)));
+        }
+
+        if (!filter_var($url, FILTER_VALIDATE_URL)) {
+            throw new RuntimeException(sprintf('API address must must be a valid URL (%s)', $url));
         }
 
         $this->url = $url;

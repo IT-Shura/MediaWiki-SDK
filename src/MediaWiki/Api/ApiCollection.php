@@ -15,9 +15,15 @@ class ApiCollection
      * Constructor.
      * 
      * @param array $api
+     *
+     * @throws InvalidArgumentException if API collection is not array
      */
     public function __construct($api = [])
     {
+        if (!is_array($api)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be array, %s given', __METHOD__, gettype($api)));
+        }
+
         foreach ($api as $language => $instance) {
             $this->add($language, $instance);
         }
@@ -25,10 +31,16 @@ class ApiCollection
 
     /**
      * @param string $language
-     * @param Api    $api
+     * @param Api $api
+     *
+     * @throws InvalidArgumentException if language code is not string
      */
     public function add($language, Api $api)
     {
+        if (!is_string($language)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, gettype($language)));
+        }
+
         $this->api[$language] = $api;
     }
 
@@ -36,9 +48,16 @@ class ApiCollection
      * @param string $language
      * 
      * @return Api
+     *
+     * @throws InvalidArgumentException if language code is not string
+     * @throws InvalidArgumentException if API wih specified language code does not exist
      */
     public function get($language)
     {
+        if (!is_string($language)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, gettype($language)));
+        }
+
         if ($this->has($language)) {
             return $this->api[$language];
         }
@@ -58,9 +77,15 @@ class ApiCollection
      * @param string $language
      * 
      * @return bool
+     *
+     * @throws InvalidArgumentException if language code is not string
      */
     public function has($language)
     {
+        if (!is_string($language)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, gettype($language)));
+        }
+
         return array_key_exists($language, $this->api);
     }
 
