@@ -2,11 +2,12 @@
 
 namespace MediaWiki\Api;
 
+use InvalidArgumentException;
+use LogicException;
 use Mediawiki\HttpClient\HttpClientInterface;
 use Mediawiki\Storage\StorageInterface;
 use MediaWiki\Api\Exceptions\ApiException;
 use MediaWiki\Api\Exceptions\AccessDeniedException;
-use InvalidArgumentException;
 use RuntimeException;
 
 class Api
@@ -153,9 +154,17 @@ class Api
      * @param bool $decode
      * 
      * @return string|array
+     *
+     * @throws LogicException if response decoding enabled and response type is not JSON
      */
     public function request($method, $parameters = [], $headers = [], $decode = true)
     {
+        if (!$this->isMethodAllowed($method)) {
+            $allowedMethods = implode(', ', $this->getAllowedRequestMethods());
+
+            throw new LogicException(sprintf('Method "%s" is not allowed. Allowed methods: %s', $method, $allowedMethods));
+        }
+
         if (is_string($parameters)) {
             parse_str($parameters, $result);
 
@@ -165,7 +174,7 @@ class Api
         $parameters = array_merge($this->getDefaultParameters(), $parameters);
 
         if ($decode and (strtolower($parameters['format']) !== 'json')) {
-            throw new InvalidArgumentException('Only JSON can be decoded. Specify JSON format or disable decoding');
+            throw new LogicException('Only JSON can be decoded. Specify JSON format or disable decoding');
         }
 
         if ($this->logQueries) {
@@ -183,6 +192,24 @@ class Api
         }
 
         return $response;
+    }
+
+    /**
+     * @param string $method
+     *
+     * @return bool
+     */
+    public function isMethodAllowed($method)
+    {
+        return in_array(strtoupper($method), $this->getAllowedRequestMethods());
+    }
+
+    /**
+     * @return array
+     */
+    public function getAllowedRequestMethods()
+    {
+        return ['GET', 'POST'];
     }
 
     /**

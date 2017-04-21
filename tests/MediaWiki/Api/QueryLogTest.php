@@ -22,6 +22,20 @@ class QueryLogTest extends TestCase
             [
                 'method' => 'GET',
                 'parameters' => ['foo' => 'bar'],
+                'response' => 'FooBarBaz',
+            ],
+            [
+                'method' => 'POST',
+                'parameters' => ['foo' => 'bar'],
+            ],
+        ];
+
+        $this->assertEquals($expectedLog, $queryLog->getLog());
+
+        $expectedLog = [
+            [
+                'method' => 'GET',
+                'parameters' => ['foo' => 'bar'],
                 'headers' => [],
                 'cookies' => [],
                 'response' => 'FooBarBaz',
@@ -34,26 +48,12 @@ class QueryLogTest extends TestCase
             ],
         ];
 
-        $this->assertEquals($expectedLog, $queryLog->getLog());
-
-        $expectedLog = [
-            [
-                'method' => 'GET',
-                'response' => 'FooBarBaz',
-            ],
-            [
-                'method' => 'POST',
-            ],
-        ];
-
-        $this->assertEquals($expectedLog, $queryLog->getLog(['method', 'response']));
+        $this->assertEquals($expectedLog, $queryLog->getLog(['method', 'parameters', 'headers', 'cookies', 'response']));
 
         $expectedLog = [
             [
                 'method' => 'POST',
                 'parameters' => ['foo' => 'bar'],
-                'headers' => ['baz' => 'qux'],
-                'cookies' => [],
             ],
         ];
 

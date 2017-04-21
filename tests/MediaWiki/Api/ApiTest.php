@@ -124,15 +124,11 @@ class ApiTest extends TestCase
             [
                 'method' => $method,
                 'parameters' => $expectedParameters1,
-                'headers' => $headers,
-                'cookies' => $cookies,
                 'response' => $expectedResponse1,
             ],
             [
                 'method' => $method,
                 'parameters' => $expectedParameters2,
-                'headers' => $headers,
-                'cookies' => $cookies,
                 'response' => $expectedResponse2,
             ],
         ];
@@ -147,23 +143,25 @@ class ApiTest extends TestCase
             [
                 'method' => $method,
                 'parameters' => $expectedParameters1,
+                'headers' => $headers,
+                'cookies' => $cookies,
                 'response' => $expectedResponse1,
             ],
             [
                 'method' => $method,
                 'parameters' => $expectedParameters2,
+                'headers' => $headers,
+                'cookies' => $cookies,
                 'response' => $expectedResponse2,
             ],
         ];
 
-        $this->assertEquals($expectedLog, $api->getQueryLog(['method', 'parameters', 'response']));
+        $this->assertEquals($expectedLog, $api->getQueryLog(['method', 'parameters', 'headers', 'cookies', 'response']));
 
         $expectedLog = [
             [
                 'method' => $method,
                 'parameters' => $expectedParameters2,
-                'headers' => $headers,
-                'cookies' => $cookies,
                 'response' => $expectedResponse2,
             ],
         ];
@@ -181,6 +179,10 @@ class ApiTest extends TestCase
         $this->assertEquals($expectedLog, $api->getQueryLog(['method', 'parameters', 'response'], 1));
     }
 
+    /**
+     * TODO:
+     * - test method with string query (foo=bar&baz=qux)
+     */
     public function testRequest()
     {
         $method = 'GET';
@@ -216,13 +218,35 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException LogicException
+     */
+    public function testRequestWithNotAllowedMethod()
+    {
+        $url = 'http://wikipedia.org/w/api.php';
+
+        $parameters = ['action' => 'query'];
+
+        $cookies = [];
+
+        $client = Mockery::mock(HttpClientInterface::class);
+        $storage = Mockery::mock(StorageInterface::class);
+
+        $key = sprintf('%s.cookies', $url);
+
+        $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
+
+        $api = new Api($url, $client, $storage);
+
+        $api->request('PUT', $parameters);
+    }
+
+    /**
+     * @expectedException LogicException
      */
     public function testRequestDecodeNotJson()
     {
         $url = 'http://wikipedia.org/w/api.php';
 
-        $defaultParameters = ['format' => 'json'];
         $parameters = ['action' => 'query', 'format' => 'xml'];
 
         $cookies = [];
@@ -236,7 +260,7 @@ class ApiTest extends TestCase
 
         $api = new Api($url, $client, $storage);
 
-        $response = $api->request('GET', $parameters);
+        $api->request('GET', $parameters);
     }
 
     public function testLogin()
@@ -305,13 +329,12 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * TODO:
+     * - test method with string query (foo=bar&baz=qux)
      */
-    public function testQueryWithInvaldAction()
+    public function testQuery()
     {
         $url = 'http://wikipedia.org/w/api.php';
-
-        $parameters = ['action' => 'parse'];
 
         $cookies = [];
 
@@ -324,6 +347,27 @@ class ApiTest extends TestCase
 
         $api = new Api($url, $client, $storage);
 
-        $response = $api->query($parameters);
+        $api->query(['titles' => 'Foo']);
+    }
+
+    /**
+     * @expectedException InvalidArgumentException
+     */
+    public function testQueryWithInvalidAction()
+    {
+        $url = 'http://wikipedia.org/w/api.php';
+
+        $cookies = [];
+
+        $client = Mockery::mock(HttpClientInterface::class);
+        $storage = Mockery::mock(StorageInterface::class);
+
+        $key = sprintf('%s.cookies', $url);
+
+        $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
+
+        $api = new Api($url, $client, $storage);
+
+        $api->query(['action' => 'parse']);
     }
 }

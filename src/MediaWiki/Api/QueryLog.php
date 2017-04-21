@@ -54,7 +54,9 @@ class QueryLog
      */
     public function getLog($fields = null, $count = null)
     {
-        $fields = $fields === null ? $this->availableFields : $fields;
+        $defaultFields = ['method', 'parameters', 'response'];
+
+        $fields = $fields === null ? $defaultFields : $fields;
 
         if (count(array_diff($fields, $this->availableFields)) > 0) {
             $unknownFields = array_diff($fields, $this->availableFields);
