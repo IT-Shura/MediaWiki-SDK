@@ -336,9 +336,23 @@ class ApiTest extends TestCase
     {
         $url = 'http://wikipedia.org/w/api.php';
 
+        $headers = [];
         $cookies = [];
 
+        $expectedParameters = [
+            'action' => 'query',
+            'format' => 'json',
+            'titles' => 'Foo'
+        ];
+
+        $expectedResponse = ['response' => 'Bar'];
+
+        $arguments = ['POST', $url, $expectedParameters, $headers, $cookies];
+
         $client = Mockery::mock(HttpClientInterface::class);
+
+        $client->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
+
         $storage = Mockery::mock(StorageInterface::class);
 
         $key = sprintf('%s.cookies', $url);
