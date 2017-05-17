@@ -56,7 +56,7 @@ class Api
 
     /**
      * Constructor.
-     * 
+     *
      * @param string $url
      * @param HttpClientInterface $client
      * @param StorageInterface $storage
@@ -152,9 +152,10 @@ class Api
      * @param array|string $parameters
      * @param array $headers
      * @param bool $decode
-     * 
+     *
      * @return string|array
      *
+     * @throws LogicException if request method is not allowed
      * @throws LogicException if response decoding enabled and response type is not JSON
      */
     public function request($method, $parameters = [], $headers = [], $decode = true)
@@ -241,7 +242,7 @@ class Api
 
     /**
      * @param array $parameters
-     * 
+     *
      * @return Api
      */
     public function setDefaultParameters($parameters)
@@ -267,9 +268,9 @@ class Api
      * @param string $username
      * @param string $password
      * @param string|null $domain
-     * 
+     *
      * @return bool
-     * 
+     *
      * @throws ApiException
      */
     public function login($username, $password, $domain = null)
@@ -339,6 +340,8 @@ class Api
      * @param bool $decode
      *
      * @return array|string
+     *
+     * @throws LogicException if action specified and not equals "query"
      */
     public function query($parameters, $decode = true)
     {
@@ -349,7 +352,7 @@ class Api
         }
 
         if (array_key_exists('action', $parameters) and strtolower($parameters['action']) !== 'query') {
-            throw new InvalidArgumentException('Invalid action. Omit action parameter or use request() method');
+            throw new LogicException('Invalid action. Omit action parameter or use request() method');
         }
 
         $parameters = array_merge(['action' => 'query'], $parameters);

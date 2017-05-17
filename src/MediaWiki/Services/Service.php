@@ -8,7 +8,7 @@ class Service
 {
     /**
      * Constructor.
-     * 
+     *
      * @param ApiCollection $api
      */
     public function __construct(ApiCollection $api)
@@ -16,6 +16,11 @@ class Service
         $this->api = $api;
     }
 
+    /**
+     * @param string $language
+     *
+     * @return MediaWiki\Api\Api
+     */
     protected function api($language)
     {
         return $this->api->get($language);

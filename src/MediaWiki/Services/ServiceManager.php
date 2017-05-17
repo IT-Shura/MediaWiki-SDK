@@ -27,7 +27,7 @@ class ServiceManager
 
     /**
      * Constructor.
-     * 
+     *
      * @param ApiCollection $api
      */
     public function __construct(ApiCollection $api)
@@ -37,22 +37,20 @@ class ServiceManager
 
     /**
      * @param string $name
-     * 
+     *
      * @return Service
      */
-    public function get($name)
+    public function getService($name)
     {
         if (!array_key_exists($name, $this->services)) {
             throw new RuntimeException(sprintf('Service %s does not exists', $name));
         }
 
-        if (array_key_exists($name, $this->instances)) {
-            return $this->instances[$name];
+        if (!array_key_exists($name, $this->instances)) {
+            $class = $this->services[$name];
+
+            $this->instances[$name] = new $class($this->api);
         }
-
-        $class = $this->services[$name];
-
-        $this->instances[$name] = new $class($this->api);
 
         return $this->instances[$name];
     }

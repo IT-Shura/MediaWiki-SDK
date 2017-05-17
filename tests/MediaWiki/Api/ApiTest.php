@@ -365,7 +365,7 @@ class ApiTest extends TestCase
     }
 
     /**
-     * @expectedException InvalidArgumentException
+     * @expectedException LogicException
      */
     public function testQueryWithInvalidAction()
     {
