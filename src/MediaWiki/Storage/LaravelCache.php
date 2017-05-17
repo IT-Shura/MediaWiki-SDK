@@ -2,14 +2,14 @@
 
 namespace MediaWiki\Storage;
 
-use Illuminate\Cache\CacheManager;
+use Illuminate\Cache\Repository;
 
 class LaravelCache implements StorageInterface
 {
     /**
      * The file cache directory.
      *
-     * @var Illuminate\Cache\CacheManager
+     * @var Illuminate\Cache\Repository
      */
     protected $cache;
 
@@ -21,17 +21,17 @@ class LaravelCache implements StorageInterface
     /**
      * Constructor.
      *
-     * @param Illuminate\Cache\CacheManager $cache
+     * @param Illuminate\Cache\Repository $cache
      * @param string $prefix
      */
-    public function __construct(CacheManager $cache, $prefix = '')
+    public function __construct(Repository $cache, $prefix = '')
     {
         $this->cache = $cache;
         $this->prefix = $prefix;
     }
 
     /**
-     * @return Illuminate\Cache\CacheManager
+     * @return Illuminate\Cache\Repository
      */
     public function getCache()
     {
@@ -51,7 +51,7 @@ class LaravelCache implements StorageInterface
      *
      * @param string|array $key
      * @param mixed $default
-     * 
+     *
      * @return mixed
      */
     public function get($key, $default = null)
@@ -76,7 +76,7 @@ class LaravelCache implements StorageInterface
      *
      * @param string $key
      * @param mixed  $value
-     * 
+     *
      * @return int
      */
     public function increment($key, $value = 1)
@@ -89,7 +89,7 @@ class LaravelCache implements StorageInterface
      *
      * @param string $key
      * @param mixed  $value
-     * 
+     *
      * @return int
      */
     public function decrement($key, $value = 1)
@@ -112,7 +112,7 @@ class LaravelCache implements StorageInterface
      * Remove an item from the cache.
      *
      * @param string $key
-     * 
+     *
      * @return bool
      */
     public function forget($key)
