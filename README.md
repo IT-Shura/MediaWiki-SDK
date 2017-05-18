@@ -25,11 +25,11 @@ MediaWiki SDK - библиотека для работы с API MediaWiki.
 ```php
 use MediaWiki\Api\Api;
 use MediaWiki\Storage\FileStore;
-use MediaWiki\HttpClient\GuzzleHttpClient;
+use MediaWiki\HttpClient\CurlHttpClient;
 
 $url = 'http://ru.example.com/api.php';
 
-$client = new GuzzleHttpClient();
+$client = new CurlHttpClient();
 $storage = new FileStore(__DIR__.'/storage/cache');
 
 $api = new Api($url, $client, $storage);
@@ -64,7 +64,7 @@ $parameters = [
     'list' => 'allpages',
 ];
 
-$response = $this->request('POST', $parameters);
+$response = $api->request('POST', $parameters);
 
 // или
 
