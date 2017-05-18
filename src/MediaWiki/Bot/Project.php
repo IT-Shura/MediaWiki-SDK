@@ -46,7 +46,7 @@ class Project
 
     /**
      * Constructor.
-     * 
+     *
      * @param ApiCollection $api
      * @param ServiceManager $services
      */
@@ -75,7 +75,7 @@ class Project
 
     /**
      * @param string
-     * 
+     *
      * @return Project
      */
     public function setDefaultLanguage($language)
@@ -104,7 +104,7 @@ class Project
 
     /**
      * @param string|null $language
-     * 
+     *
      * @return Mediawiki\Api\Api
      */
     public function api($language = null)
@@ -120,17 +120,17 @@ class Project
 
     /**
      * @param string $name
-     * 
+     *
      * @return MediaWiki\Services\Service
      */
     public function service($name)
     {
-        return $this->services->get($name);
+        return $this->services->getService($name);
     }
 
     /**
      * @param ApiCollection $api
-     * 
+     *
      * @return Project
      */
     public function setApiCollection(ApiCollection $api)
@@ -150,7 +150,7 @@ class Project
 
     /**
      * @param ServiceManager $api
-     * 
+     *
      * @return Project
      */
     public function setServiceManager(ServiceManager $services)
