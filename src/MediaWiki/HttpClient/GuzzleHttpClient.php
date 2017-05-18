@@ -18,7 +18,7 @@ class GuzzleHttpClient implements HttpClientInterface
      * @param array $cookies
      * @param array $headers
      */
-    public function __construct($cookies = [], $headers = [])
+    public function __construct(array $cookies = [], array $headers = [])
     {
         $cookieJar = new CookieJar(false, $cookies);
 
@@ -41,7 +41,7 @@ class GuzzleHttpClient implements HttpClientInterface
      *
      * @return string
      */
-    public function request($method, $url, $parameters = [], $headers = [], $cookies = [])
+    public function request($method, $url, array $parameters = [], array $headers = [], array $cookies = [])
     {
         $options = [
             'form_params' => $parameters,
@@ -67,7 +67,7 @@ class GuzzleHttpClient implements HttpClientInterface
      *
      * @return string
      */
-    public function get($url, $parameters = [], $headers = [], $cookies = [])
+    public function get($url, array $parameters = [], array $headers = [], array $cookies = [])
     {
         return $this->request('GET', $url, $parameters);
     }
@@ -82,7 +82,7 @@ class GuzzleHttpClient implements HttpClientInterface
      *
      * @return string
      */
-    public function post($url, $parameters = [], $headers = [], $cookies = [])
+    public function post($url, array $parameters = [], array $headers = [], array $cookies = [])
     {
         return $this->request('POST', $url, $parameters);
     }
