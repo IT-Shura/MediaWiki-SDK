@@ -1,6 +1,6 @@
 # MediaWiki SDK
 
-[![Build Status](https://travis-ci.org/Imangazaliev/DiDOM.svg)](https://travis-ci.org/IT-Shura/MediaWiki-SDK)
+[![Build Status](https://travis-ci.org/IT-Shura/MediaWiki-SDK.svg)](https://travis-ci.org/IT-Shura/MediaWiki-SDK)
 [![Total Downloads](https://poser.pugx.org/it-shura/mediawiki-sdk/downloads)](https://packagist.org/packages/it-shura/mediawiki-sdk)
 [![Latest Stable Version](https://poser.pugx.org/it-shura/mediawiki-sdk/v/stable)](https://packagist.org/packages/it-shura/mediawiki-sdk)
 [![License](https://poser.pugx.org/it-shura/mediawiki-sdk/license)](https://packagist.org/packages/it-shura/mediawiki-sdk)
