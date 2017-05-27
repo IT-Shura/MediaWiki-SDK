@@ -8,10 +8,13 @@ use RuntimeException;
 trait AuthTrait
 {
     /**
-     * @param string $language
+     * @param string|null $language
      * @param string|null $domain
      * 
      * @return bool
+     *
+     * @throws RuntimeException if username for specified language is not defined
+     * @throws ApiException
      */
     public function login($language = null, $domain = null)
     {
@@ -26,7 +29,7 @@ trait AuthTrait
         $usernames = $this->project->getApiUsernames();
 
         if (!array_key_exists($language, $usernames)) {
-            throw new RuntimeException(sprintf('Username for "%s" wiki not defined (%s)', $language, $this->project->getName()));
+            throw new RuntimeException(sprintf('Username for "%s" wiki is not defined (%s)', $language, $this->project->getName()));
         }
 
         $username = $usernames[$language];
@@ -34,48 +37,18 @@ trait AuthTrait
         while (true) {
             $password = $this->secret(sprintf('Please, enter the password for "%s" wiki', $language));
 
-            try {
-                return $api->login($username, $password, $domain);
-            } catch (ApiException $exception) {
-                if ($exception->getMessage() === 'NotExists') {
-                    $message = sprintf('User with name "%s" does not exists in "%s" wiki', $username, $language);
+            if ($password === '') {
+                $this->error(sprintf('Password can not be empty'));
 
-                    throw new RuntimeException($message);
-                }
-
-                if ($exception->getMessage() === 'NoName') {
-                    throw new RuntimeException(sprintf('Username can not be empty (%s)', $language));
-                }
-
-                if ($exception->getMessage() === 'Illegal') {
-                    throw new RuntimeException(sprintf('Username is invalid (%s)', $language));
-                }
-
-                if ($exception->getMessage() === 'EmptyPass') {
-                    $this->error(sprintf('Password can not be empty (%s)', $language));
-
-                    continue;
-                }
-
-                if ($exception->getMessage() === 'WrongPass') {
-                    $this->error('Wrong password. Please try again');
-
-                    continue;
-                }
-
-                if ($exception->getMessage() === 'UserBlocked') {
-                    $this->error(sprintf('User "%s" is blocked (%s)', $username, $language));
-
-                    continue;
-                }
-
-                throw $exception;
+                continue;
             }
+
+            return $api->login($username, $password, $domain);
         }
     }
 
     /**
-     * @param string|array $languages
+     * @param string|array|null $languages
      */
     public function logout($languages = null)
     {
@@ -97,6 +70,8 @@ trait AuthTrait
     }
 
     /**
+     * @param string|null $language
+     *
      * @return bool
      */
     public function isLoggedIn($language = null)

@@ -7,6 +7,8 @@
 
 MediaWiki SDK - библиотека для работы с API MediaWiki.
 
+Минимальная версия MediaWiki: 1.27+.
+
 ## Содержание
 
 - [Установка](#Установка)
@@ -24,12 +26,13 @@ MediaWiki SDK - библиотека для работы с API MediaWiki.
 
 ```php
 use MediaWiki\Api\Api;
+use MediaWiki\Api\Exceptions\ApiException;
 use MediaWiki\Storage\FileStore;
-use MediaWiki\HttpClient\CurlHttpClient;
+use MediaWiki\HttpClient\GuzzleHttpClient;
 
 $url = 'http://ru.example.com/api.php';
 
-$client = new CurlHttpClient();
+$client = new GuzzleHttpClient();
 $storage = new FileStore(__DIR__.'/storage/cache');
 
 $api = new Api($url, $client, $storage);
@@ -38,8 +41,8 @@ $api = new Api($url, $client, $storage);
 ## Авторизация
 
 ```php
-$username = 'DummyUser';
-$password = '123456';
+$username = 'John@FooBot';
+$password = 'pri9l1fl1j315hmp3okbnqspqcgaue1t';
 
 try {
     $api->login($username, $password);

@@ -39,6 +39,8 @@ class CommandManager
 
     /**
      * @param string $commandsFolder
+     *
+     * @throws InvalidArgumentException if path to command folder is not string
      */
     protected function setCommandsFolder($commandsFolder)
     {

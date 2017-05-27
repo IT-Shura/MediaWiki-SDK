@@ -263,13 +263,18 @@ class ApiTest extends TestCase
         $api->request('GET', $parameters);
     }
 
+    /**
+     * TODO: test login() method with invalid arguments
+     */
     public function testLogin()
     {
         $url = 'http://wikipedia.org/w/api.php';
 
-        $username = 'foo';
-        $password = 'bar';
+        $username = 'John@FooBot';
+        $password = 'pri9l1fl1j315hmp3okbnqspqcgaue1t';
         $domain = null;
+
+        $token = '21fb442aac84673468b66d2b46cf76c559299384+\\';
 
         $headers = [];
         $cookies = [];
@@ -277,17 +282,17 @@ class ApiTest extends TestCase
         $client = Mockery::mock(HttpClientInterface::class);
 
         $expectedParameters = [
-            'action' => 'login',
-            'lgname' => $username,
-            'lgpassword' => $password,
-            'lgdomain' => $domain,
+            'action' => 'query',
+            'meta' => 'tokens',
+            'type' => 'login',
             'format' => 'json',
         ];
 
         $expectedResponse = [
-            'login' => [
-                'result' => 'NeedToken',
-                'token' => 'token',
+            'query' => [
+                'tokens' => [
+                    'logintoken' => $token,
+                ],
             ],
         ];
 
@@ -295,8 +300,14 @@ class ApiTest extends TestCase
 
         $client->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
 
-        // send received token
-        $expectedParameters['lgtoken'] = 'token';
+        $expectedParameters = [
+            'action' => 'login',
+            'lgname' => $username,
+            'lgpassword' => $password,
+            'lgdomain' => $domain,
+            'lgtoken' => $token,
+            'format' => 'json',
+        ];
 
         $expectedResponse = [
             'login' => [

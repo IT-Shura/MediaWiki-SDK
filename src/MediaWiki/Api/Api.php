@@ -275,20 +275,39 @@ class Api
      */
     public function login($username, $password, $domain = null)
     {
+        if (!is_string($username)) {
+            throw new InvalidArgumentException(sprintf('Username must be a string, %s given (%s)', gettype($username), $this->url));
+        }
+
+        if ($username === '') {
+            throw new RuntimeException(sprintf('Username can not be empty (%s)', $this->url));
+        }
+
+        if (!is_string($password)) {
+            throw new InvalidArgumentException(sprintf('Password must be a string, %s given (%s)', gettype($password), $this->url));
+        }
+
+        if ($password === '') {
+            throw new RuntimeException(sprintf('Password can not be empty (%s)', $this->url));
+        }
+
+        $data = [
+            'action' => 'query',
+            'meta' => 'tokens',
+            'type' => 'login',
+        ];
+
+        $response = $this->request('POST', $data);
+
         $data = [
             'action' => 'login',
             'lgname' => $username,
             'lgpassword' => $password,
             'lgdomain' => $domain,
+            'lgtoken' => $response['query']['tokens']['logintoken'],
         ];
 
         $response = $this->request('POST', $data);
-
-        if ($response['login']['result'] === 'NeedToken') {
-            $data['lgtoken'] = $response['login']['token'];
-
-            $response = $this->request('POST', $data);
-        }
 
         if ($response['login']['result'] === 'Success') {
             $this->cookies = $this->client->getCookies();
@@ -300,7 +319,13 @@ class Api
             return true;
         }
 
-        throw new ApiException($response['login']['result']);
+        if ($response['login']['result'] === 'Failed') {
+            $exceptionMessage = $response['login']['result']."\n \n".$response['login']['reason'];
+        } else {
+            $exceptionMessage = $response['login']['result'];
+        }
+
+        throw new ApiException($exceptionMessage);
     }
 
     /**
