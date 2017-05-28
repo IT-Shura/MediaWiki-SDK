@@ -125,11 +125,11 @@ class ProjectManager
         }
 
         if (!is_array($apiUrls)) {
-            throw new InvalidArgumentException(sprintf('%s expects parameter 2 to be array, %s given', __METHOD__, gettype($format)));
+            throw new InvalidArgumentException(sprintf('%s expects parameter 2 to be array, %s given', __METHOD__, gettype($apiUrls)));
         }
 
         if (!is_array($apiUsernames)) {
-            throw new InvalidArgumentException(sprintf('%s expects parameter 3 to be array, %s given', __METHOD__, gettype($format)));
+            throw new InvalidArgumentException(sprintf('%s expects parameter 3 to be array, %s given', __METHOD__, gettype($apiUsernames)));
         }
 
         if (!empty($apiUrls)) {
