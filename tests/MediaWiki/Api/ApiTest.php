@@ -334,9 +334,7 @@ class ApiTest extends TestCase
 
         $api = new Api($url, $client, $storage);
 
-        $result = $api->login($username, $password);
-
-        $this->assertTrue($result);
+        $api->login($username, $password);
     }
 
     /**

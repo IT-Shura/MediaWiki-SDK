@@ -132,16 +132,12 @@ class ProjectManager
             throw new InvalidArgumentException(sprintf('%s expects parameter 3 to be array, %s given', __METHOD__, gettype($apiUsernames)));
         }
 
-        if (!empty($apiUrls)) {
-            foreach ($apiUrls as $language => $url) {
-                $project->setApiUrl($language, $url);
-            }
+        foreach ($apiUrls as $language => $url) {
+            $project->setApiUrl($language, $url);
         }
 
-        if (!empty($apiUsernames)) {
-            foreach ($apiUsernames as $language => $username) {
-                $project->setApiUsername($language, $username);
-            }
+        foreach ($apiUsernames as $language => $username) {
+            $project->setApiUsername($language, $username);
         }
 
         $apiCollection = new ApiCollection();
@@ -152,9 +148,10 @@ class ProjectManager
             $apiCollection->add($language, $api);
         }
 
+        $project->setApiCollection($apiCollection);
+
         $serviceManager = new ServiceManager($apiCollection);
 
-        $project->setApiCollection($apiCollection);
         $project->setServiceManager($serviceManager);
 
         return $project;

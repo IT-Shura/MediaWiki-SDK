@@ -269,8 +269,6 @@ class Api
      * @param string $password
      * @param string|null $domain
      *
-     * @return bool
-     *
      * @throws ApiException
      */
     public function login($username, $password, $domain = null)
@@ -316,7 +314,7 @@ class Api
 
             $this->storage->forever($key, $this->cookies);
 
-            return true;
+            return;
         }
 
         if ($response['login']['result'] === 'Failed') {
