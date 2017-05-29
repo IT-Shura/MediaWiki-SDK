@@ -189,11 +189,15 @@ class CurlHttpClient implements HttpClientInterface
 
             list($name, $value) = explode(': ', $line);
 
-            $result[$name] = $value;
-        }
+            if ($name === 'Set-Cookie') {
+                if (!array_key_exists('Set-Cookie', $result)) {
+                    $result['Set-Cookie'] = [];
+                }
 
-        if (array_key_exists('Set-Cookie', $result)) {
-            $result['Set-Cookie'] = $this->parseCookie($result['Set-Cookie']);
+                $result['Set-Cookie'] = array_merge($result['Set-Cookie'], $this->parseCookie($value));
+            } else {
+                $result[$name] = $value;
+            }
         }
 
         return $result;
