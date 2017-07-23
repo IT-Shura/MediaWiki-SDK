@@ -2,32 +2,39 @@
 
 namespace Tests\MediaWiki\Bot;
 
-use Mediawiki\HttpClient\HttpClientInterface;
-use Mediawiki\Storage\StorageInterface;
+use MediaWiki\Api\ApiCollection;
 use MediaWiki\Bot\ProjectManager;
-use MediaWiki\Bot\Project;
+use MediaWiki\Project\ProjectFactoryInterface;
+use MediaWiki\Services\ServiceManager;
 use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
+use Tests\Stubs\ProjectExample;
 use Tests\TestCase;
 use Mockery;
 
-/**
- * TODO: write tests createProjectMethod
- */
 class ProjectManagerTest extends TestCase
 {
     /**
      * @var vfsStreamDirectory
      */
-    private $projectsFolder;
+    private $projectsDirectory;
+
+    /**
+     * @var string
+     */
+    private $projectsDirectoryPath;
 
     public function setUp()
     {
-        $this->projectsFolder = vfsStream::setup('projects');
+        $this->projectsDirectory = vfsStream::setup('projects');
+        $this->projectsDirectoryPath = vfsStream::url('projects');
     }
 
     public function testSetGetNamespace()
     {
-        $projectManager = $this->createProjectManager();
+        $projectFactory = Mockery::mock(ProjectFactoryInterface::class);
+
+        $projectManager = new ProjectManager($projectFactory, $this->projectsDirectoryPath);
 
         // returns $this
         $this->assertEquals($projectManager, $projectManager->setNamespace('MyNamespace'));
@@ -36,21 +43,25 @@ class ProjectManagerTest extends TestCase
 
     public function testProjectExists()
     {
-        $projectManager = $this->createProjectManager();
+        $projectFactory = Mockery::mock(ProjectFactoryInterface::class);
+
+        $projectManager = new ProjectManager($projectFactory, $this->projectsDirectoryPath);
 
         $this->assertFalse($projectManager->projectExists('foo'));
 
-        vfsStream::newFile('foo.php')->at($this->projectsFolder);
+        vfsStream::newFile('foo.php')->at($this->projectsDirectory);
 
         $this->assertTrue($projectManager->projectExists('foo'));
     }
 
     /**
-     * @expectedException RuntimeException
+     * @expectedException \RuntimeException
      */
-    public function testLoadNotExistenProject()
+    public function testLoadNotExistingProject()
     {
-        $projectManager = $this->createProjectManager();
+        $projectFactory = Mockery::mock(ProjectFactoryInterface::class);
+
+        $projectManager = new ProjectManager($projectFactory, $this->projectsDirectoryPath);
 
         $projectManager->loadProject('foo');
     }
@@ -61,64 +72,41 @@ class ProjectManagerTest extends TestCase
      */
     public function testLoadProject()
     {
-        $projectManager = $this->createProjectManager();
-
         $content = file_get_contents(__DIR__.'/../../Stubs/ProjectExample.php');
 
-        vfsStream::newFile('project-example.php')->at($this->projectsFolder)->withContent($content);
+        vfsStream::newFile('project-example.php')->at($this->projectsDirectory)->withContent($content);
+
+        require_once $this->projectsDirectoryPath.'/project-example.php';
+
+        $projectFactory = Mockery::mock(ProjectFactoryInterface::class);
+
+        $apiCollection = new ApiCollection();
+        $serviceManager = new ServiceManager($apiCollection);
+
+        $project = new ProjectExample($apiCollection, $serviceManager);
+
+        $projectFactory->shouldReceive('createProject')->with(
+            ProjectExample::getApiUrls(),
+            'Tests\Stubs\ProjectExample'
+        )->once()->andReturn($project);
+
+        $projectsFolder = vfsStream::url('projects');
+
+        $projectManager = new ProjectManager($projectFactory, $projectsFolder);
 
         $projectManager->setNamespace('Tests\Stubs');
 
-        $project = $projectManager->loadProject('project-example');
+        $loadedProject = $projectManager->loadProject('project-example');
 
-        $this->assertInstanceOf(Project::class, $project);
+        $this->assertEquals($project, $loadedProject);
     }
 
     public function testProjectsFolder()
     {
-        $client = Mockery::mock(HttpClientInterface::class);
-        $storage = Mockery::mock(StorageInterface::class);
+        $projectFactory = Mockery::mock(ProjectFactoryInterface::class);
 
-        $projectsFolder = vfsStream::url('projects');
+        $projectManager = new ProjectManager($projectFactory, $this->projectsDirectoryPath);
 
-        $projectManager = new ProjectManager($client, $storage, $projectsFolder);
-
-        $this->assertEquals($projectsFolder, $projectManager->getProjectsFolder());
-    }
-
-    public function testGetHttpClient()
-    {
-        $client = Mockery::mock(HttpClientInterface::class);
-        $storage = Mockery::mock(StorageInterface::class);
-
-        $projectsFolder = vfsStream::url('projects');
-
-        $projectManager = new ProjectManager($client, $storage, $projectsFolder);
-
-        $this->assertEquals($client, $projectManager->getHttpClient());
-    }
-
-    public function testStorage()
-    {
-        $client = Mockery::mock(HttpClientInterface::class);
-        $storage = Mockery::mock(StorageInterface::class);
-
-        $projectsFolder = vfsStream::url('projects');
-
-        $projectManager = new ProjectManager($client, $storage, $projectsFolder);
-
-        $this->assertEquals($storage, $projectManager->getStorage());
-    }
-
-    protected function createProjectManager()
-    {
-        $client = Mockery::mock(HttpClientInterface::class);
-        $storage = Mockery::mock(StorageInterface::class);
-
-        $storage->shouldReceive('get');
-
-        $projectsFolder = vfsStream::url('projects');
-
-        return new ProjectManager($client, $storage, $projectsFolder);
+        $this->assertEquals($this->projectsDirectoryPath, $projectManager->getProjectsDirectory());
     }
 }

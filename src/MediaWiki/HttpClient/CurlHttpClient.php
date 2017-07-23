@@ -31,9 +31,9 @@ class CurlHttpClient implements HttpClientInterface
      *
      * @param string $method
      * @param string $url
-     * @param array  $parameters
-     * @param array  $headers
-     * @param array  $cookies
+     * @param array $parameters
+     * @param array $headers
+     * @param array $cookies
      *
      * @return string
      */
@@ -72,9 +72,9 @@ class CurlHttpClient implements HttpClientInterface
      * Makes a GET HTTP request to the specified URL.
      *
      * @param  string $url
-     * @param  string $parameters
-     * @param  array  $headers
-     * @param  array  $cookies
+     * @param  array $parameters
+     * @param  array $headers
+     * @param  array $cookies
      *
      * @return string
      */
@@ -87,9 +87,9 @@ class CurlHttpClient implements HttpClientInterface
      * Makes a POST HTTP request to the specified URL.
      *
      * @param  string $url
-     * @param  string $parameters
-     * @param  array  $headers
-     * @param  array  $cookies
+     * @param  array $parameters
+     * @param  array $headers
+     * @param  array $cookies
      *
      * @return string
      */
@@ -112,7 +112,7 @@ class CurlHttpClient implements HttpClientInterface
      * @param array $headers
      * @param array $cookies
      *
-     * @return string
+     * @return array
      */
     private function buildRequestHeaders($headers, $cookies)
     {

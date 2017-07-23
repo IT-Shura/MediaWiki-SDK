@@ -3,17 +3,18 @@
 namespace MediaWiki\Bot;
 
 use LogicException;
+use MediaWiki\Storage\StorageInterface;
+use MediaWiki\Project\Project;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
-use Symfony\Component\Console\Style\SymfonyStyle as OutputStyle;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\Table;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle as OutputStyle;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Question\ChoiceQuestion;
-use MediaWiki\Storage\StorageInterface;
 
 class Command extends SymfonyCommand
 {
@@ -25,12 +26,12 @@ class Command extends SymfonyCommand
     protected $storage;
 
     /**
-     * @var MediaWiki\Bot\Project
+     * @var Project
      */
     protected $project;
 
     /**
-     * @var MediaWiki\Bot\CommandManager
+     * @var CommandManager
      */
     protected $commandManager;
 
@@ -97,7 +98,7 @@ class Command extends SymfonyCommand
     }
 
     /**
-     * @param InputInterface $output
+     * @param InputInterface $input
      */
     public function setInput(InputInterface $input)
     {

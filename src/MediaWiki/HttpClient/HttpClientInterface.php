@@ -29,7 +29,7 @@ interface HttpClientInterface
      * Makes a GET HTTP request to the specified URL.
      *
      * @param string $url
-     * @param string $parameters
+     * @param array $parameters
      * @param array  $headers
      * @param array  $cookies
      *
@@ -41,7 +41,7 @@ interface HttpClientInterface
      * Makes a POST HTTP request to the specified URL.
      *
      * @param string $url
-     * @param string $parameters
+     * @param array $parameters
      * @param array  $headers
      * @param array  $cookies
      *

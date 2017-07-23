@@ -3,6 +3,7 @@
 namespace MediaWiki\Services;
 
 use MediaWiki\Api\ApiCollection;
+use MediaWiki\Api\ApiInterface;
 
 class Service
 {
@@ -19,7 +20,7 @@ class Service
     /**
      * @param string $language
      *
-     * @return MediaWiki\Api\Api
+     * @return ApiInterface
      */
     protected function api($language)
     {

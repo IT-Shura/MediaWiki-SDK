@@ -2,21 +2,22 @@
 
 namespace Tests\MediaWiki\Bot;
 
+use LogicException;
+use MediaWiki\Api\ApiCollection;
+use MediaWiki\Bot\CommandManager;
+use MediaWiki\Bot\Command;
+use MediaWiki\Services\ServiceManager;
+use MediaWiki\Storage\StorageInterface;
+use org\bovigo\vfs\vfsStream;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Question\ChoiceQuestion;
-use Mediawiki\Storage\StorageInterface;
-use MediaWiki\Bot\CommandManager;
-use MediaWiki\Bot\Command;
-use MediaWiki\Bot\Project;
-use MediaWiki\Api\ApiCollection;
 use Tests\Stubs\ProjectExample;
 use Tests\Stubs\CommandExample;
 use Tests\Stubs\CommandWithoutName;
-use org\bovigo\vfs\vfsStream;
 use Tests\TestCase;
 use Mockery;
 
@@ -27,7 +28,7 @@ class CommandTest extends TestCase
      */
     public function testConstructWithoutName()
     {
-        $project = new CommandWithoutName();
+        new CommandWithoutName();
     }
 
     public function testSetGetProject()
@@ -79,11 +80,6 @@ class CommandTest extends TestCase
 
     public function testRun()
     {
-        $storage = Mockery::mock(StorageInterface::class);
-
-        $project = $this->createProjectMock();
-        $commandManager = $this->createCommandManager();
-
         $input = Mockery::mock(InputInterface::class);
         $output = Mockery::mock(OutputInterface::class);
 
@@ -146,7 +142,6 @@ class CommandTest extends TestCase
 
         $input = Mockery::mock(InputInterface::class)->shouldReceive('getArguments')->once()->andReturn(['foo' => 'bar'])->getMock();
         $input->shouldReceive('getArgument')->once()->with('foo')->andReturn('bar')->getMock();
-        $output = Mockery::mock(OutputInterface::class);
 
         $command->setInput($input);
 
@@ -442,22 +437,24 @@ class CommandTest extends TestCase
     protected function createProject()
     {
         $apiCollection = new ApiCollection();
+        $serviceManager = new ServiceManager($apiCollection);
 
-        return new ProjectExample($apiCollection);
+        return new ProjectExample($apiCollection, $serviceManager);
     }
 
     protected function createProjectMock()
     {
         $apiCollection = new ApiCollection();
+        $serviceManager = new ServiceManager($apiCollection);
 
-        return Mockery::mock(ProjectExample::class, [$apiCollection]);
+        return Mockery::mock(ProjectExample::class, [$apiCollection, $serviceManager]);
     }
 
     protected function createCommandManager()
     {
         $storage = Mockery::mock(StorageInterface::class);
-        $commandsFolder = vfsStream::url('commands');
+        $commandsDirectory = vfsStream::url('commands');
 
-        return Mockery::mock(CommandManager::class, [$storage, $commandsFolder]);
+        return Mockery::mock(CommandManager::class, [$storage, $commandsDirectory]);
     }
 }

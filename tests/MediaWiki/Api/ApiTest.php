@@ -4,70 +4,70 @@ namespace Tests\MediaWiki\Api;
 
 use Tests\TestCase;
 use MediaWiki\Api\Api;
-use Mediawiki\HttpClient\HttpClientInterface;
-use Mediawiki\Storage\StorageInterface;
+use MediaWiki\HttpClient\HttpClientInterface;
+use MediaWiki\Storage\StorageInterface;
 use Mockery;
 
 class ApiTest extends TestCase
 {
     public function testConstructor()
     {
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
         $storage = Mockery::mock(StorageInterface::class);
 
         $key = sprintf('%s.cookies', $url);
 
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn([]);
 
-        $api = new Api($url, $client, $storage);
+        new Api($url, $httpClient, $storage);
     }
 
     public function testGetUrl()
     {
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
         $storage = Mockery::mock(StorageInterface::class);
 
         $key = sprintf('%s.cookies', $url);
 
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn([]);
 
-        $api = new Api($url, $client, $storage);
+        $api = new Api($url, $httpClient, $storage);
 
         $this->assertEquals($url, $api->getUrl());
     }
 
-    public function testGetClient()
+    public function testGetHttpClient()
     {
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
         $storage = Mockery::mock(StorageInterface::class);
 
         $key = sprintf('%s.cookies', $url);
 
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn([]);
 
-        $api = new Api($url, $client, $storage);
+        $api = new Api($url, $httpClient, $storage);
 
-        $this->assertEquals($client, $api->getClient());
+        $this->assertEquals($httpClient, $api->getHttpClient());
     }
 
     public function testGetStorage()
     {
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
         $storage = Mockery::mock(StorageInterface::class);
 
         $key = sprintf('%s.cookies', $url);
 
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn([]);
 
-        $api = new Api($url, $client, $storage);
+        $api = new Api($url, $httpClient, $storage);
 
         $this->assertEquals($storage, $api->getStorage());
     }
@@ -75,7 +75,7 @@ class ApiTest extends TestCase
     public function testQueryLogging()
     {
         $method = 'GET';
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
         $defaultParameters = ['format' => 'json'];
 
@@ -91,15 +91,15 @@ class ApiTest extends TestCase
         $headers = [];
         $cookies = [];
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
 
         $arguments1 = [$method, $url, $expectedParameters1, $headers, $cookies];
         $arguments2 = [$method, $url, $expectedParameters2, $headers, $cookies];
 
-        $client->shouldReceive('request')->once()->withArgs($arguments1)->andReturn(json_encode($expectedResponse1));
-        $client->shouldReceive('request')->once()->withArgs($arguments1)->andReturn(json_encode($expectedResponse1));
-        $client->shouldReceive('request')->once()->withArgs($arguments2)->andReturn(json_encode($expectedResponse2));
-        $client->shouldReceive('request')->once()->withArgs($arguments1)->andReturn(json_encode($expectedResponse1));
+        $httpClient->shouldReceive('request')->once()->withArgs($arguments1)->andReturn(json_encode($expectedResponse1));
+        $httpClient->shouldReceive('request')->once()->withArgs($arguments1)->andReturn(json_encode($expectedResponse1));
+        $httpClient->shouldReceive('request')->once()->withArgs($arguments2)->andReturn(json_encode($expectedResponse2));
+        $httpClient->shouldReceive('request')->once()->withArgs($arguments1)->andReturn(json_encode($expectedResponse1));
 
         $storage = Mockery::mock(StorageInterface::class);
 
@@ -107,7 +107,7 @@ class ApiTest extends TestCase
 
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
 
-        $api = new Api($url, $client, $storage);
+        $api = new Api($url, $httpClient, $storage);
 
         $this->assertEquals([], $api->getQueryLog());
 
@@ -186,7 +186,7 @@ class ApiTest extends TestCase
     public function testRequest()
     {
         $method = 'GET';
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
         $defaultParameters = ['format' => 'json'];
         $parameters = ['action' => 'query'];
@@ -196,13 +196,13 @@ class ApiTest extends TestCase
         $headers = [];
         $cookies = [];
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
 
         $expectedParameters = array_merge($defaultParameters, $parameters);
 
         $arguments = [$method, $url, $expectedParameters, $headers, $cookies];
 
-        $client->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
+        $httpClient->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
 
         $storage = Mockery::mock(StorageInterface::class);
 
@@ -210,7 +210,7 @@ class ApiTest extends TestCase
 
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
 
-        $api = new Api($url, $client, $storage);
+        $api = new Api($url, $httpClient, $storage);
 
         $response = $api->request($method, $parameters);
 
@@ -222,20 +222,20 @@ class ApiTest extends TestCase
      */
     public function testRequestWithNotAllowedMethod()
     {
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
         $parameters = ['action' => 'query'];
 
         $cookies = [];
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
         $storage = Mockery::mock(StorageInterface::class);
 
         $key = sprintf('%s.cookies', $url);
 
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
 
-        $api = new Api($url, $client, $storage);
+        $api = new Api($url, $httpClient, $storage);
 
         $api->request('PUT', $parameters);
     }
@@ -245,20 +245,20 @@ class ApiTest extends TestCase
      */
     public function testRequestDecodeNotJson()
     {
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
         $parameters = ['action' => 'query', 'format' => 'xml'];
 
         $cookies = [];
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
         $storage = Mockery::mock(StorageInterface::class);
 
         $key = sprintf('%s.cookies', $url);
 
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
 
-        $api = new Api($url, $client, $storage);
+        $api = new Api($url, $httpClient, $storage);
 
         $api->request('GET', $parameters);
     }
@@ -268,7 +268,7 @@ class ApiTest extends TestCase
      */
     public function testLogin()
     {
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
         $username = 'John@FooBot';
         $password = 'pri9l1fl1j315hmp3okbnqspqcgaue1t';
@@ -279,7 +279,7 @@ class ApiTest extends TestCase
         $headers = [];
         $cookies = [];
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
 
         $expectedParameters = [
             'action' => 'query',
@@ -298,7 +298,7 @@ class ApiTest extends TestCase
 
         $arguments = ['POST', $url, $expectedParameters, $headers, $cookies];
 
-        $client->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
+        $httpClient->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
 
         $expectedParameters = [
             'action' => 'login',
@@ -317,13 +317,13 @@ class ApiTest extends TestCase
 
         $arguments = ['POST', $url, $expectedParameters, $headers, $cookies];
 
-        $client->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
+        $httpClient->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
 
         $receivedCookies = [
             'foo' => 'bar',
         ];
 
-        $client->shouldReceive('getCookies')->once()->andReturn($receivedCookies);
+        $httpClient->shouldReceive('getCookies')->once()->andReturn($receivedCookies);
 
         $storage = Mockery::mock(StorageInterface::class);
 
@@ -332,7 +332,7 @@ class ApiTest extends TestCase
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
         $storage->shouldReceive('forever')->once()->with($key, $receivedCookies)->andReturn($cookies);
 
-        $api = new Api($url, $client, $storage);
+        $api = new Api($url, $httpClient, $storage);
 
         $api->login($username, $password);
     }
@@ -343,7 +343,7 @@ class ApiTest extends TestCase
      */
     public function testQuery()
     {
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
         $headers = [];
         $cookies = [];
@@ -358,9 +358,9 @@ class ApiTest extends TestCase
 
         $arguments = ['POST', $url, $expectedParameters, $headers, $cookies];
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
 
-        $client->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
+        $httpClient->shouldReceive('request')->once()->withArgs($arguments)->andReturn(json_encode($expectedResponse));
 
         $storage = Mockery::mock(StorageInterface::class);
 
@@ -368,7 +368,7 @@ class ApiTest extends TestCase
 
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
 
-        $api = new Api($url, $client, $storage);
+        $api = new Api($url, $httpClient, $storage);
 
         $api->query(['titles' => 'Foo']);
     }
@@ -378,18 +378,18 @@ class ApiTest extends TestCase
      */
     public function testQueryWithInvalidAction()
     {
-        $url = 'http://wikipedia.org/w/api.php';
+        $url = 'https://wikipedia.org/w/api.php';
 
         $cookies = [];
 
-        $client = Mockery::mock(HttpClientInterface::class);
+        $httpClient = Mockery::mock(HttpClientInterface::class);
         $storage = Mockery::mock(StorageInterface::class);
 
         $key = sprintf('%s.cookies', $url);
 
         $storage->shouldReceive('get')->once()->with($key, [])->andReturn($cookies);
 
-        $api = new Api($url, $client, $storage);
+        $api = new Api($url, $httpClient, $storage);
 
         $api->query(['action' => 'parse']);
     }

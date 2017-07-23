@@ -2,7 +2,7 @@
 
 namespace Tests\Stubs;
 
-use MediaWiki\Bot\Project;
+use MediaWiki\Project\Project;
 
 class ProjectExample extends Project
 {
@@ -24,18 +24,18 @@ class ProjectExample extends Project
     /**
      * @return array
      */
-    public function getApiUrls()
+    public static function getApiUrls()
     {
         return [
-            'en' => 'http://en.wikipedia.org/w/api.php',
-            'ru' => 'http://ru.wikipedia.org/w/api.php',
+            'en' => 'https://en.wikipedia.org/w/api.php',
+            'ru' => 'https://ru.wikipedia.org/w/api.php',
         ];
     }
 
     /**
      * @return array
      */
-    public function getApiUsernames()
+    public static function getApiUsernames()
     {
         return [
             'en' => 'FooBot',

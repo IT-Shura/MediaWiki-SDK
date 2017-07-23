@@ -2,24 +2,26 @@
 
 namespace Tests\MediaWiki\Api;
 
-use MediaWiki\Api\Api;
+use InvalidArgumentException;
 use MediaWiki\Api\ApiCollection;
-use Mediawiki\HttpClient\HttpClientInterface;
-use Mediawiki\Storage\StorageInterface;
+use MediaWiki\Api\ApiInterface;
 use Mockery;
 use Tests\TestCase;
 
 class ApiCollectionTest extends TestCase
 {
-    public function testConstructor()
+    public function testConstructorWithoutParameters()
     {
         $apiCollection = new ApiCollection();
 
         $this->assertEquals([], $apiCollection->getAll());
+    }
 
+    public function testConstructorWithoutArrayOfApi()
+    {
         $api = [
-            'en' => $this->createApi('en'),
-            'ru' => $this->createApi('ru'),
+            'en' => $this->createApiMock(),
+            'ru' => $this->createApiMock(),
         ];
 
         $apiCollection = new ApiCollection($api);
@@ -27,11 +29,14 @@ class ApiCollectionTest extends TestCase
         $this->assertEquals($api, $apiCollection->getAll());
     }
 
-    /**
-     * @expectedException InvalidArgumentException
-     */
     public function testConstructorWithNonArray()
     {
+        if (PHP_VERSION_ID >= 70000) {
+            $this->setExpectedException('TypeError');
+        } else {
+            $this->setExpectedException('PHPUnit_Framework_Error');
+        }
+
         new ApiCollection(null);
     }
 
@@ -41,7 +46,7 @@ class ApiCollectionTest extends TestCase
     public function testConstructorWithInvalidLanguageCodeType()
     {
         $api = [
-            $this->createApi('en'),
+            $this->createApiMock(),
         ];
 
         // throws InvalidArgumentException because language code must be a string
@@ -65,7 +70,7 @@ class ApiCollectionTest extends TestCase
 
     public function testAdd()
     {
-        $api = $this->createApi('en');
+        $api = $this->createApiMock();
 
         $apiCollection = new ApiCollection();
 
@@ -79,7 +84,7 @@ class ApiCollectionTest extends TestCase
      */
     public function testAddWithInvalidLanguageCodeType()
     {
-        $api = $this->createApi('en');
+        $api = $this->createApiMock();
 
         $apiCollection = new ApiCollection();
 
@@ -88,7 +93,7 @@ class ApiCollectionTest extends TestCase
 
     public function testGet()
     {
-        $api = $this->createApi('en');
+        $api = $this->createApiMock();
 
         $apiCollection = new ApiCollection(['en' => $api]);
 
@@ -117,7 +122,7 @@ class ApiCollectionTest extends TestCase
 
     public function testHas()
     {
-        $api = $this->createApi('en');
+        $api = $this->createApiMock();
 
         $apiCollection = new ApiCollection();
 
@@ -145,8 +150,8 @@ class ApiCollectionTest extends TestCase
         $this->assertEquals([], $apiCollection->getLanguages());
 
         $api = [
-            'en' => $this->createApi('en'),
-            'ru' => $this->createApi('ru'),
+            'en' => $this->createApiMock(),
+            'ru' => $this->createApiMock(),
         ];
 
         $apiCollection = new ApiCollection($api);
@@ -154,46 +159,31 @@ class ApiCollectionTest extends TestCase
         $this->assertEquals(['en', 'ru'], $apiCollection->getLanguages());
     }
 
-    protected function createApi($language)
+    protected function createApiMock()
     {
-        $url = sprintf('http://%s.wikipedia.org/w/api.php', $language);
-
-        $client = Mockery::mock(HttpClientInterface::class);
-        $storage = Mockery::mock(StorageInterface::class);
-
-        $storage->shouldReceive('get');
-
-        return new Api($url, $client, $storage);
+        return Mockery::mock(ApiInterface::class);
     }
 
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
     public function testEnableQueryLog()
     {
-        $apiEn = Mockery::mock('overload:MediaWiki\Api\Api');
-        $apiRu = Mockery::mock('overload:MediaWiki\Api\Api');
+        $apiEn = Mockery::mock(ApiInterface::class);
+        $apiRu = Mockery::mock(ApiInterface::class);
 
         $apiEn->shouldReceive('enableQueryLog')->once();
         $apiRu->shouldReceive('enableQueryLog')->once();
 
         $apiCollection = new ApiCollection([
             'en' => $apiEn,
-            'en' => $apiRu,
+            'ru' => $apiRu,
         ]);
 
         $apiCollection->enableQueryLog();
     }
 
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
     public function testDisableQueryLog()
     {
-        $apiEn = Mockery::mock('overload:MediaWiki\Api\Api');
-        $apiRu = Mockery::mock('overload:MediaWiki\Api\Api');
+        $apiEn = Mockery::mock(ApiInterface::class);
+        $apiRu = Mockery::mock(ApiInterface::class);
 
         $apiEn->shouldReceive('disableQueryLog')->once();
         $apiRu->shouldReceive('disableQueryLog')->once();
@@ -206,14 +196,10 @@ class ApiCollectionTest extends TestCase
         $apiCollection->disableQueryLog();
     }
 
-    /**
-     * @runInSeparateProcess
-     * @preserveGlobalState disabled
-     */
     public function testGetQueryLog()
     {
-        $apiEn = Mockery::mock('overload:MediaWiki\Api\Api');
-        $apiRu = Mockery::mock('overload:MediaWiki\Api\Api');
+        $apiEn = Mockery::mock(ApiInterface::class);
+        $apiRu = Mockery::mock(ApiInterface::class);
 
         $apiEn->shouldReceive('getQueryLog')->once()->andReturn(['foo' => 'bar']);
         $apiRu->shouldReceive('getQueryLog')->once()->andReturn(['baz' => 'qux']);
@@ -230,7 +216,7 @@ class ApiCollectionTest extends TestCase
 
         $this->assertEquals($expectedQueryLog, $apiCollection->getQueryLog());
 
-        $api = Mockery::mock('overload:MediaWiki\Api\Api');
+        $api = Mockery::mock(ApiInterface::class);
 
         $api->shouldReceive('getQueryLog')->withArgs([null, null])->once();
         $api->shouldReceive('getQueryLog')->withArgs([['method', 'response'], null])->once();

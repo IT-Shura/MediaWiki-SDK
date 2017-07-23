@@ -13,10 +13,13 @@ class ServiceManager
     protected $services = [
         'namespaces' => Namespaces::class,
         'pages' => Pages::class,
+        'siteinfo' => SiteInfo::class,
     ];
 
     /**
-     * @var Service[]
+     * Service instances.
+     *
+     * @var array
      */
     protected $instances = [];
 
@@ -43,7 +46,7 @@ class ServiceManager
     public function getService($name)
     {
         if (!array_key_exists($name, $this->services)) {
-            throw new RuntimeException(sprintf('Service %s does not exists', $name));
+            throw new RuntimeException(sprintf('Service %s does not exist', $name));
         }
 
         if (!array_key_exists($name, $this->instances)) {

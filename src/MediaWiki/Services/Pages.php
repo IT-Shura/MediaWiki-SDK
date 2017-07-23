@@ -2,6 +2,8 @@
 
 namespace MediaWiki\Services;
 
+use Psr\Log\InvalidArgumentException;
+
 class Pages extends Service
 {
     /**

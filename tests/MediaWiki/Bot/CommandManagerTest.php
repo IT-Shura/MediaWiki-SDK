@@ -2,12 +2,13 @@
 
 namespace Tests\MediaWiki\Bot;
 
-use Mediawiki\HttpClient\HttpClientInterface;
-use Mediawiki\Storage\StorageInterface;
+use InvalidArgumentException;
+use MediaWiki\Storage\StorageInterface;
 use MediaWiki\Bot\CommandManager;
 use MediaWiki\Bot\Command;
-use MediaWiki\Bot\Project;
 use org\bovigo\vfs\vfsStream;
+use org\bovigo\vfs\vfsStreamDirectory;
+use RuntimeException;
 use Tests\TestCase;
 use Mockery;
 
@@ -93,7 +94,7 @@ class CommandManagerTest extends TestCase
 
         $commandManager = new CommandManager($storage, $commandsFolder);
 
-        $this->assertEquals($commandsFolder, $commandManager->getCommandsFolder());
+        $this->assertEquals($commandsFolder, $commandManager->getCommandsDirectory());
     }
 
     public function testStorage()

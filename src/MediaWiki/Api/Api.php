@@ -4,13 +4,13 @@ namespace MediaWiki\Api;
 
 use InvalidArgumentException;
 use LogicException;
-use Mediawiki\HttpClient\HttpClientInterface;
-use Mediawiki\Storage\StorageInterface;
+use MediaWiki\HttpClient\HttpClientInterface;
+use MediaWiki\Storage\StorageInterface;
 use MediaWiki\Api\Exceptions\ApiException;
 use MediaWiki\Api\Exceptions\AccessDeniedException;
 use RuntimeException;
 
-class Api
+class Api implements ApiInterface
 {
     /**
      * @var string
@@ -18,12 +18,12 @@ class Api
     protected $url;
 
     /**
-     * @var Mediawiki\HttpClient\HttpClientInterface
+     * @var HttpClientInterface
      */
-    protected $client;
+    protected $httpClient;
 
     /**
-     * @var Mediawiki\Storage\StorageInterface
+     * @var StorageInterface
      */
     protected $storage;
 
@@ -50,24 +50,19 @@ class Api
     ];
 
     /**
-     * @var string
-     */
-    private $version;
-
-    /**
      * Constructor.
      *
      * @param string $url
-     * @param HttpClientInterface $client
+     * @param HttpClientInterface $httpClient
      * @param StorageInterface $storage
      */
-    public function __construct($url, HttpClientInterface $client, StorageInterface $storage)
+    public function __construct($url, HttpClientInterface $httpClient, StorageInterface $storage)
     {
         $this->setUrl($url);
 
         $this->queryLog = new QueryLog();
 
-        $this->client = $client;
+        $this->httpClient = $httpClient;
         $this->storage = $storage;
 
         $key = sprintf('%s.cookies', $this->url);
@@ -103,15 +98,15 @@ class Api
     }
 
     /**
-     * @return Mediawiki\HttpClient\HttpClientInterface
+     * @return HttpClientInterface
      */
-    public function getClient()
+    public function getHttpClient()
     {
-        return $this->client;
+        return $this->httpClient;
     }
 
     /**
-     * @return Mediawiki\Storage\StorageInterface
+     * @return StorageInterface
      */
     public function getStorage()
     {
@@ -148,7 +143,7 @@ class Api
     }
 
     /**
-     * @param strting $method HTTP method name
+     * @param string $method HTTP method name
      * @param array|string $parameters
      * @param array $headers
      * @param bool $decode
@@ -182,7 +177,7 @@ class Api
             $this->queryLog->logQuery($method, $parameters, $headers, $this->cookies);
         }
 
-        $response = $this->client->request($method, $this->url, $parameters, $headers, $this->cookies);
+        $response = $this->httpClient->request($method, $this->url, $parameters, $headers, $this->cookies);
 
         if ($decode) {
             $response = $this->decodeResponse($response);
@@ -242,15 +237,36 @@ class Api
 
     /**
      * @param array $parameters
+     * @param bool $decode
+     *
+     * @return array|string
+     *
+     * @throws LogicException if action specified and not equals "query"
+     */
+    public function query($parameters, $decode = true)
+    {
+        if (is_string($parameters)) {
+            parse_str($parameters, $result);
+
+            $parameters = $result;
+        }
+
+        if (array_key_exists('action', $parameters) and strtolower($parameters['action']) !== 'query') {
+            throw new LogicException('Invalid action. Omit action parameter or use request() method');
+        }
+
+        $parameters = array_merge(['action' => 'query'], $parameters);
+
+        return $this->request('POST', $parameters, [], $decode);
+    }
+
+    /**
+     * @param array $parameters
      *
      * @return Api
      */
-    public function setDefaultParameters($parameters)
+    public function setDefaultParameters(array $parameters)
     {
-        if (!is_array($parameters)) {
-            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, gettype($parameters)));
-        }
-
         $this->defaultParameters = $parameters;
 
         return $this;
@@ -308,7 +324,7 @@ class Api
         $response = $this->request('POST', $data);
 
         if ($response['login']['result'] === 'Success') {
-            $this->cookies = $this->client->getCookies();
+            $this->cookies = $this->httpClient->getCookies();
 
             $key = sprintf('%s.cookies', $this->url);
 
@@ -356,50 +372,5 @@ class Api
         $response = $this->request('POST', $data);
 
         return $response === [];
-    }
-
-    /**
-     * @param array $parameters
-     * @param bool $decode
-     *
-     * @return array|string
-     *
-     * @throws LogicException if action specified and not equals "query"
-     */
-    public function query($parameters, $decode = true)
-    {
-        if (is_string($parameters)) {
-            parse_str($parameters, $result);
-
-            $parameters = $result;
-        }
-
-        if (array_key_exists('action', $parameters) and strtolower($parameters['action']) !== 'query') {
-            throw new LogicException('Invalid action. Omit action parameter or use request() method');
-        }
-
-        $parameters = array_merge(['action' => 'query'], $parameters);
-
-        return $this->request('POST', $parameters, [], $decode);
-    }
-
-    /**
-     * @return string
-     */
-    public function getVersion()
-    {
-        if ($this->version === null) {
-            $response = $this->request('POST', [
-                'action' => 'query',
-                'meta' => 'siteinfo',
-                'continue' => '',
-            ]);
-
-            $segments = explode(' ', $response['query']['general']['generator']);
-
-            $this->version = $segments[1];
-        }
-
-        return $this->version;
     }
 }

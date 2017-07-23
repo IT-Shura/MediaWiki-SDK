@@ -3,6 +3,7 @@
 namespace MediaWiki\Bot;
 
 use MediaWiki\Helpers;
+use MediaWiki\Project\Project;
 use MediaWiki\Storage\StorageInterface;
 use InvalidArgumentException;
 use RuntimeException;
@@ -17,7 +18,7 @@ class CommandManager
     /**
      * @var string
      */
-    protected $commandsFolder;
+    protected $commandsDirectory;
 
     /**
      * @var string
@@ -28,27 +29,27 @@ class CommandManager
      * Constructor.
      * 
      * @param StorageInterface $storage
-     * @param string $commandsFolder
+     * @param string $commandsDirectory
      */
-    public function __construct(StorageInterface $storage, $commandsFolder)
+    public function __construct(StorageInterface $storage, $commandsDirectory)
     {
         $this->storage = $storage;
 
-        $this->setCommandsFolder($commandsFolder);
+        $this->setCommandsDirectory($commandsDirectory);
     }
 
     /**
-     * @param string $commandsFolder
+     * @param string $commandsDirectory
      *
-     * @throws InvalidArgumentException if path to command folder is not string
+     * @throws InvalidArgumentException if path to command directory is not string
      */
-    protected function setCommandsFolder($commandsFolder)
+    protected function setCommandsDirectory($commandsDirectory)
     {
-        if (!is_string($commandsFolder)) {
-            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, gettype($commandsFolder)));
+        if (!is_string($commandsDirectory)) {
+            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, gettype($commandsDirectory)));
         }
 
-        $this->commandsFolder = $commandsFolder;
+        $this->commandsDirectory = $commandsDirectory;
     }
 
     /**
@@ -95,7 +96,7 @@ class CommandManager
      */
     public function getCommandsList()
     {
-        $files = scandir($this->commandsFolder);
+        $files = scandir($this->commandsDirectory);
 
         $commands = [];
 
@@ -113,9 +114,9 @@ class CommandManager
     /**
      * @return string
      */
-    public function getCommandsFolder()
+    public function getCommandsDirectory()
     {
-        return $this->commandsFolder;
+        return $this->commandsDirectory;
     }
 
     /**
@@ -135,18 +136,18 @@ class CommandManager
      */
     protected function find($name)
     {
-        $filename = sprintf('%s/%s.php', $this->commandsFolder, $name);
+        $filename = sprintf('%s/%s.php', $this->commandsDirectory, $name);
 
         if (file_exists($filename)) {
             return $filename;
         }
 
-        $filename = sprintf('%s/%s/%s.php', $this->commandsFolder, $name, $name);
+        $filename = sprintf('%s/%s/%s.php', $this->commandsDirectory, $name, $name);
 
         if (file_exists($filename)) {
             return $filename;
         }
 
-        throw new RuntimeException(sprintf('Command with name "%s" does not exists', $name));
+        throw new RuntimeException(sprintf('Command with name "%s" does not exist', $name));
     }
 }

@@ -8,7 +8,7 @@ use GuzzleHttp\Cookie\CookieJar;
 class GuzzleHttpClient implements HttpClientInterface
 {
     /**
-     * @var GuzzleHttp\Client
+     * @var GuzzleClient
      */
     protected $client;
 
@@ -35,9 +35,9 @@ class GuzzleHttpClient implements HttpClientInterface
      *
      * @param string $method
      * @param string $url
-     * @param array  $parameters
-     * @param array  $headers
-     * @param array  $cookies
+     * @param array $parameters
+     * @param array $headers
+     * @param array $cookies
      *
      * @return string
      */
@@ -61,9 +61,9 @@ class GuzzleHttpClient implements HttpClientInterface
      * Makes a GET HTTP request to the specified URL.
      *
      * @param  string $url
-     * @param  string $parameters
-     * @param  array  $headers
-     * @param  array  $cookies
+     * @param  array $parameters
+     * @param  array $headers
+     * @param  array $cookies
      *
      * @return string
      */
@@ -76,9 +76,9 @@ class GuzzleHttpClient implements HttpClientInterface
      * Makes a POST HTTP request to the specified URL.
      *
      * @param  string $url
-     * @param  string $parameters
-     * @param  array  $headers
-     * @param  array  $cookies
+     * @param  array $parameters
+     * @param  array $headers
+     * @param  array $cookies
      *
      * @return string
      */

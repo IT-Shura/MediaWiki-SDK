@@ -18,12 +18,8 @@ class ApiCollection
      *
      * @throws InvalidArgumentException if API collection is not array
      */
-    public function __construct($api = [])
+    public function __construct(array $api = [])
     {
-        if (!is_array($api)) {
-            throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be array, %s given', __METHOD__, gettype($api)));
-        }
-
         foreach ($api as $language => $instance) {
             $this->add($language, $instance);
         }
@@ -31,11 +27,11 @@ class ApiCollection
 
     /**
      * @param string $language
-     * @param Api $api
+     * @param ApiInterface $api
      *
      * @throws InvalidArgumentException if language code is not string
      */
-    public function add($language, Api $api)
+    public function add($language, ApiInterface $api)
     {
         if (!is_string($language)) {
             throw new InvalidArgumentException(sprintf('%s expects parameter 1 to be string, %s given', __METHOD__, gettype($language)));
@@ -47,7 +43,7 @@ class ApiCollection
     /**
      * @param string $language
      * 
-     * @return Api
+     * @return ApiInterface
      *
      * @throws InvalidArgumentException if language code is not string
      * @throws InvalidArgumentException if API wih specified language code does not exist
@@ -133,7 +129,7 @@ class ApiCollection
      *
      * @return array
      */
-    public function getQueryLog($fields = null, $count = null)
+    public function getQueryLog(array $fields = null, $count = null)
     {
         $log = [];
 

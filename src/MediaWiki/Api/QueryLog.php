@@ -104,10 +104,10 @@ class QueryLog
      */
     public function clearLog()
     {
-        $temp = $this->queryLog;
+        $result = $this->queryLog;
 
         $this->queryLog = [];
 
-        return $temp;
+        return $result;
     }
 }

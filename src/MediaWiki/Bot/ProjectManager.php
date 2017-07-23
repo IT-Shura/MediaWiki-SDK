@@ -3,30 +3,21 @@
 namespace MediaWiki\Bot;
 
 use MediaWiki\Helpers;
-use MediaWiki\Api\Api;
-use MediaWiki\Api\ApiCollection;
-use MediaWiki\Services\ServiceManager;
-use Mediawiki\HttpClient\HttpClientInterface;
-use Mediawiki\Storage\StorageInterface;
+use MediaWiki\Project\Project;
+use MediaWiki\Project\ProjectFactoryInterface;
 use RuntimeException;
-use InvalidArgumentException;
 
 class ProjectManager
 {
     /**
-     * @var HttpClientInterface
+     * @var string
      */
-    protected $client;
-
-    /**
-     * @var StorageInterface
-     */
-    protected $storage;
+    protected $projectFactory;
 
     /**
      * @var string
      */
-    protected $projectsFolder;
+    protected $projectsDirectory;
 
     /**
      * @var string
@@ -35,16 +26,14 @@ class ProjectManager
 
     /**
      * Constructor.
-     * 
-     * @param HttpClientInterface $client
-     * @param StorageInterface $storage
-     * @param string $projectsFolder
+     *
+     * @param ProjectFactoryInterface $projectFactory
+     * @param string $projectsDirectory
      */
-    public function __construct(HttpClientInterface $client, StorageInterface $storage, $projectsFolder = null)
+    public function __construct(ProjectFactoryInterface $projectFactory, $projectsDirectory)
     {
-        $this->client = $client;
-        $this->storage = $storage;
-        $this->projectsFolder = $projectsFolder;
+        $this->projectFactory = $projectFactory;
+        $this->projectsDirectory = $projectsDirectory;
     }
 
     /**
@@ -74,87 +63,33 @@ class ProjectManager
      */
     public function projectExists($name)
     {
-        $filename = sprintf('%s/%s.php', $this->projectsFolder, $name);
+        $filename = sprintf('%s/%s.php', $this->projectsDirectory, $name);
 
         return file_exists($filename);
     }
 
     /**
-     * @param string $name The name of the project
+     * @param string $projectName
      * 
      * @return Project
      * 
      * @throws RuntimeException if project does not exists
      */
-    public function loadProject($name)
+    public function loadProject($projectName)
     {
-        $filename = sprintf('%s/%s.php', $this->projectsFolder, $name);
+        $filename = sprintf('%s/%s.php', $this->projectsDirectory, $projectName);
 
         if (!file_exists($filename)) {
-            throw new RuntimeException(sprintf('Project with name "%s" does not exists', $name));
+            throw new RuntimeException(sprintf('Project with name "%s" does not exist', $projectName));
         }
 
         require_once $filename;
 
-        $class = sprintf('%s\%s', $this->namespace, Helpers\pascal_case($name));
+        $projectClassName = sprintf('%s\%s', $this->namespace, Helpers\pascal_case($projectName));
 
-        return $this->createProject([], [], $class);
-    }
+        $apiUrls = call_user_func([$projectClassName, 'getApiUrls']);
 
-    /**
-     * @param  array  $apiUrls
-     * @param  array  $apiUsernames
-     * @param  Project|string $class
-     * 
-     * @return Project
-     */
-    public function createProject($apiUrls = [], $apiUsernames = [], $class = Project::class)
-    {
-        if (is_string($class)) {
-            if (!class_exists($class)) {
-                throw new InvalidArgumentException(sprintf('Class "%s" does not exists', $class));
-            }
-
-            $project = new $class();
-        } else {
-            $project = $class;
-        }
-
-        if (!$project instanceof Project) {
-            throw new InvalidArgumentException(sprintf('Argument 1 passed to %s must be an instance of %s, %s given', __METHOD__, Project::class, (is_object($project) ? get_class($project) : gettype($project))));
-        }
-
-        if (!is_array($apiUrls)) {
-            throw new InvalidArgumentException(sprintf('%s expects parameter 2 to be array, %s given', __METHOD__, gettype($apiUrls)));
-        }
-
-        if (!is_array($apiUsernames)) {
-            throw new InvalidArgumentException(sprintf('%s expects parameter 3 to be array, %s given', __METHOD__, gettype($apiUsernames)));
-        }
-
-        foreach ($apiUrls as $language => $url) {
-            $project->setApiUrl($language, $url);
-        }
-
-        foreach ($apiUsernames as $language => $username) {
-            $project->setApiUsername($language, $username);
-        }
-
-        $apiCollection = new ApiCollection();
-
-        foreach ($project->getApiUrls() as $language => $url) {
-            $api = new Api($url, $this->client, $this->storage);
-
-            $apiCollection->add($language, $api);
-        }
-
-        $project->setApiCollection($apiCollection);
-
-        $serviceManager = new ServiceManager($apiCollection);
-
-        $project->setServiceManager($serviceManager);
-
-        return $project;
+        return $this->projectFactory->createProject($apiUrls, $projectClassName);
     }
 
     /**
@@ -162,26 +97,24 @@ class ProjectManager
      */
     public function getProjectsList()
     {
-        $files = scandir($this->projectsFolder);
+        $files = scandir($this->projectsDirectory);
 
         $projects = [];
 
-        $apiCollection = new ApiCollection();
-
-        foreach ($files as $file) {
-            if (in_array($file, ['.', '..'])) {
+        foreach ($files as $filename) {
+            if (in_array($filename, ['.', '..'])) {
                 continue;
             }
 
-            if (pathinfo($file, PATHINFO_EXTENSION) !== 'php') {
+            if (pathinfo($filename, PATHINFO_EXTENSION) !== 'php') {
                 continue;
             }
 
-            $data = require_once sprintf('%s/%s', $this->projectsFolder, $file);
+            require_once sprintf('%s/%s', $this->projectsDirectory, $filename);
 
-            $class = Helpers\pascal_case(basename($file, '.php'));
+            $projectClassName = Helpers\pascal_case(basename($filename, '.php'));
 
-            $projects[] = new $class($apiCollection);
+            $projects[] = $this->projectFactory->createProject($projectClassName);
         }
 
         return $projects;
@@ -190,24 +123,8 @@ class ProjectManager
     /**
      * @return string
      */
-    public function getProjectsFolder()
+    public function getProjectsDirectory()
     {
-        return $this->projectsFolder;
-    }
-
-    /**
-     * @return HttpClientInterface
-     */
-    public function getHttpClient()
-    {
-        return $this->client;
-    }
-
-    /**
-     * @return StorageInterface
-     */
-    public function getStorage()
-    {
-        return $this->storage;
+        return $this->projectsDirectory;
     }
 }

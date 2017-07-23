@@ -1,9 +1,9 @@
 <?php
 
-namespace MediaWiki\Bot;
+namespace MediaWiki\Project;
 
-use MediaWiki\Api\Api;
 use MediaWiki\Api\ApiCollection;
+use MediaWiki\Api\ApiInterface;
 use MediaWiki\Services\ServiceManager;
 use LogicException;
 
@@ -35,26 +35,16 @@ class Project
     protected $defaultLanguage;
 
     /**
-     * @var array
-     */
-    protected $apiUsernames = [];
-
-    /**
-     * @var array
-     */
-    protected $apiUrls = [];
-
-    /**
      * Constructor.
      *
      * @param ApiCollection $api
      * @param ServiceManager $services
      */
-    public function __construct(ApiCollection $api = null, ServiceManager $services = null)
+    public function __construct(ApiCollection $api, ServiceManager $services)
     {
-        $this->api = $api === null ? new ApiCollection() : $api;
+        $this->api = $api;
 
-        $this->services = $services === null ? new ServiceManager($this->api) : $services;
+        $this->services = $services;
     }
 
     /**
@@ -95,9 +85,9 @@ class Project
 
     /**
      * @param string $language
-     * @param Api    $api
+     * @param ApiInterface $api
      */
-    public function addApi($language, Api $api)
+    public function addApi($language, ApiInterface $api)
     {
         $this->api->add($language, $api);
     }
@@ -105,7 +95,7 @@ class Project
     /**
      * @param string|null $language
      *
-     * @return Mediawiki\Api\Api
+     * @return ApiInterface
      */
     public function api($language = null)
     {
@@ -121,7 +111,7 @@ class Project
     /**
      * @param string $name
      *
-     * @return MediaWiki\Services\Service
+     * @return \MediaWiki\Services\Service
      */
     public function service($name)
     {
@@ -149,7 +139,7 @@ class Project
     }
 
     /**
-     * @param ServiceManager $api
+     * @param ServiceManager $services
      *
      * @return Project
      */
@@ -169,36 +159,18 @@ class Project
     }
 
     /**
-     * @param string $language
-     * @param string $url
+     * @return array
      */
-    public function setApiUrl($language, $url)
+    public static function getApiUrls()
     {
-        $this->apiUrls[$language] = $url;
+        return [];
     }
 
     /**
      * @return array
      */
-    public function getApiUrls()
+    public static function getApiUsernames()
     {
-        return $this->apiUrls;
-    }
-
-    /**
-     * @param string $language
-     * @param string $username
-     */
-    public function setApiUsername($language, $username)
-    {
-        $this->apiUsernames[$language] = $username;
-    }
-
-    /**
-     * @return array
-     */
-    public function getApiUsernames()
-    {
-        return $this->apiUsernames;
+        return [];
     }
 }
